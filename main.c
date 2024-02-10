@@ -6,6 +6,7 @@
 
 #include "main.h"
 #include "LTexture.h"
+#include "LButton.h"
 
 //Screen dimension constants
 const int SCREEN_WIDTH = 680;
@@ -37,6 +38,11 @@ SDL_Renderer* gRenderer = NULL;
 TTF_Font* gFont = NULL;
 
 struct LTexture gTextTexture;
+
+struct LTexture gButtonTextureMap;
+
+#define TOTAL_BUTTONS 4
+struct LButton buttons[TOTAL_BUTTONS];
 
 bool init()
 {
@@ -110,12 +116,28 @@ bool loadMedia()
         }
     }
 
+    initLTexture(&gButtonTextureMap);
+    loadLTextureFromFile(&gButtonTextureMap, gRenderer, "../resources/button.png");
+
     setLTextureBlendMode(&gTextTexture, SDL_BLENDMODE_BLEND);
+
+    for (int i = 0; i<TOTAL_BUTTONS;i++){
+        initLButton(&buttons[i], gRenderer, &gButtonTextureMap);
+    }
+
+
+    //Set buttons in corners
+    LButtonSetPosition(&buttons[0],0,0);
+    LButtonSetPosition(&buttons[1],SCREEN_WIDTH - BUTTON_DEFAULT_WIDTH, 0);
+    LButtonSetPosition(&buttons[2],0, SCREEN_HEIGHT - BUTTON_DEFAULT_HEIGHT);
+    LButtonSetPosition(&buttons[3],SCREEN_WIDTH - BUTTON_DEFAULT_WIDTH, SCREEN_HEIGHT - BUTTON_DEFAULT_HEIGHT);
+
     return success;
 }
 
 void closeGame() {
 
+    freeLTexture(&gButtonTextureMap);
     freeLTexture(&gTextTexture);
 
     //Free global font
@@ -156,15 +178,22 @@ int main( int argc, char* args[] )
                     if (e.type == SDL_QUIT) {
                         quit = true;
                     }
+                    //Handle button events
+                    for( int i = 0; i < TOTAL_BUTTONS; ++i )
+                    {
+                        LButtonHandleEvent(&buttons[i],&e);
+                    }
                 }
 
                 SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
                 SDL_RenderClear(gRenderer);
 
                 //Render top left sprite
-
-                renderLTexture(&gTextTexture, (SCREEN_WIDTH - gTextTexture.mWidth)/2, (SCREEN_HEIGHT - gTextTexture.mHeight)/2, NULL);
-
+//                renderLTexture(&gTextTexture, (SCREEN_WIDTH - gTextTexture.mWidth)/2, (SCREEN_HEIGHT - gTextTexture.mHeight)/2, NULL);
+                for (int i = 0; i < TOTAL_BUTTONS;i++)
+                {
+                    LButtonRender(&buttons[i]);
+                }
                 SDL_RenderPresent(gRenderer);
             }
         }

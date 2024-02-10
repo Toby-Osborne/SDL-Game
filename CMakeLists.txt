@@ -5,7 +5,9 @@ set(CMAKE_C_STANDARD 17)
 
 add_executable(SDL2Test main.c main.h
         LTexture.c
-        LTexture.h)
+        LTexture.h
+        LButton.c
+        LButton.h)
 
 INCLUDE(FindPkgConfig)
 
