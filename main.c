@@ -158,9 +158,9 @@ int main( int argc, char* args[] )
                 SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
                 SDL_RenderClear(gRenderer);
 
-                renderLTexture(&gBackgroundTexture, gRenderer, 0, 0);
+                renderLTexture(&gBackgroundTexture, 0, 0);
 
-                renderLTexture(&gFooTexture, gRenderer, 240, 190);
+                renderLTexture(&gFooTexture, 240, 190);
                 SDL_RenderPresent(gRenderer);
             }
         }

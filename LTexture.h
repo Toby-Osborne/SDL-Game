@@ -12,6 +12,7 @@
 struct LTexture
 {
     SDL_Texture* mTexture;
+    SDL_Renderer* mRenderer;
     int mWidth;
     int mHeight;
 };
@@ -22,6 +23,6 @@ void freeLTexture(struct LTexture *texture);
 
 bool loadLTexture(struct LTexture *texture, SDL_Renderer* gRenderer, char* path);
 
-void renderLTexture(struct LTexture *texture, SDL_Renderer* gRenderer, int x, int y);
+void renderLTexture(struct LTexture *texture, int x, int y);
 
 #endif //SDLGAME_LTEXTURE_H

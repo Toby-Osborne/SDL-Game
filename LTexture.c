@@ -32,6 +32,7 @@ bool loadLTexture(struct LTexture *texture, SDL_Renderer* gRenderer, char* path)
         }
         else
         {
+            texture->mRenderer = gRenderer;
             texture->mWidth = loadedSurface->w;
             texture->mHeight = loadedSurface->h;
         }
@@ -52,10 +53,10 @@ void freeLTexture(struct LTexture *texture)
     }
 }
 
-void renderLTexture(struct LTexture *texture, SDL_Renderer* gRenderer, int x, int y)
+void renderLTexture(struct LTexture *texture, int x, int y)
 {
     // Here we create an arbitrary quad and map the texture onto it
     SDL_Rect renderQuad = {x, y, texture->mWidth, texture->mHeight};
-    SDL_RenderCopy(gRenderer, texture->mTexture, NULL, &renderQuad);
+    SDL_RenderCopy(texture->mRenderer, texture->mTexture, NULL, &renderQuad);
 }
 
