@@ -4,16 +4,16 @@
 
 #include "LTexture.h"
 
-void initLTexture(struct LTexture *texture)
+void LTextureInit(struct LTexture *texture)
 {
     texture->mTexture = NULL;
     texture->mWidth = 0;
     texture->mHeight = 0;
 }
 
-bool loadLTextureFromFile(struct LTexture *texture, SDL_Renderer* gRenderer, char* path)
+bool LTextureLoadFromFile(struct LTexture *texture, SDL_Renderer* gRenderer, char* path)
 {
-    freeLTexture(texture);
+    LTextureFree(texture);
 
     SDL_Texture* newTexture = NULL;
 
@@ -25,7 +25,7 @@ bool loadLTextureFromFile(struct LTexture *texture, SDL_Renderer* gRenderer, cha
     }
     else
     {
-        SDL_SetColorKey(loadedSurface, SDL_TRUE, SDL_MapRGB(loadedSurface->format, 0, 0xFF, 0xFF));
+        SDL_SetColorKey(loadedSurface, SDL_TRUE, SDL_MapRGB(loadedSurface->format, 0xFF, 0xFF, 0xFF));
         newTexture = SDL_CreateTextureFromSurface(gRenderer, loadedSurface);
         if(newTexture==NULL){
             printf( "Unable to create texture from %s! SDL Error: %s\n", path, SDL_GetError() );
@@ -42,10 +42,10 @@ bool loadLTextureFromFile(struct LTexture *texture, SDL_Renderer* gRenderer, cha
     return texture->mTexture != NULL;
 }
 
-bool loadLTextureFromRenderedText(struct LTexture *texture, SDL_Renderer* gRenderer, char *text, TTF_Font *font, SDL_Color textColor)
+bool LTextureLoadFromRenderedText(struct LTexture *texture, SDL_Renderer* gRenderer, char *text, TTF_Font *font, SDL_Color textColor)
 {
 //Get rid of preexisting texture
-    freeLTexture(texture);
+    LTextureFree(texture);
 
     //Render text surface
     SDL_Surface* textSurface = TTF_RenderText_Solid( font, text, textColor );
@@ -76,7 +76,7 @@ bool loadLTextureFromRenderedText(struct LTexture *texture, SDL_Renderer* gRende
     return texture->mTexture != NULL;
 }
 
-void freeLTexture(struct LTexture *texture)
+void LTextureFree(struct LTexture *texture)
 {
     if(texture->mTexture != NULL)
     {
@@ -87,7 +87,7 @@ void freeLTexture(struct LTexture *texture)
     }
 }
 
-void renderLTexture(struct LTexture *texture, int x, int y, SDL_Rect* clip)
+void LTextureRender(struct LTexture *texture, int x, int y, SDL_Rect* clip)
 {
     // Here we create an arbitrary quad and map the texture onto it
     SDL_Rect renderQuad = {x, y, texture->mWidth, texture->mHeight};
@@ -100,12 +100,12 @@ void renderLTexture(struct LTexture *texture, int x, int y, SDL_Rect* clip)
     SDL_RenderCopy(texture->mRenderer, texture->mTexture, clip, &renderQuad);
 }
 
-void setLTextureBlendMode(struct LTexture *texture, SDL_BlendMode blending)
+void LTextureSetBlendMode(struct LTexture *texture, SDL_BlendMode blending)
 {
     SDL_SetTextureBlendMode(texture->mTexture, blending);
 }
 
-void setLTextureAlpha(struct LTexture *texture, uint8_t alpha)
+void LTextureSetAlpha(struct LTexture *texture, uint8_t alpha)
 {
     SDL_SetTextureAlphaMod( texture->mTexture, alpha);
 }

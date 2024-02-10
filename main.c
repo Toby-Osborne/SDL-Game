@@ -10,22 +10,8 @@
 #include "LTimer.h"
 
 //Screen dimension constants
-const int SCREEN_WIDTH = 680;
+const int SCREEN_WIDTH = 600;
 const int SCREEN_HEIGHT = 480;
-
-const int SCREEN_FPS = 60;
-const int SCREEN_TICKS_PER_FRAME = 1000 / SCREEN_FPS;
-
-//Key press surfaces constants
-enum KeyPressSurfaces
-{
-    KEY_PRESS_SURFACE_DEFAULT,
-    KEY_PRESS_SURFACE_UP,
-    KEY_PRESS_SURFACE_DOWN,
-    KEY_PRESS_SURFACE_LEFT,
-    KEY_PRESS_SURFACE_RIGHT,
-    KEY_PRESS_SURFACE_TOTAL
-};
 
 //Starts up SDL and creates window
 bool init();
@@ -41,12 +27,8 @@ SDL_Renderer* gRenderer = NULL;
 
 TTF_Font* gFont = NULL;
 
-struct LTexture gTextTexture;
-
-struct LTexture gButtonTextureMap;
-
-#define TOTAL_BUTTONS 4
-struct LButton buttons[TOTAL_BUTTONS];
+struct LTexture gTextureCharacter;
+struct LTexture gTextureBackground;
 
 bool init()
 {
@@ -77,7 +59,7 @@ bool init()
     else
     {
 
-        gRenderer = SDL_CreateRenderer( gWindow, -1, SDL_RENDERER_ACCELERATED);
+        gRenderer = SDL_CreateRenderer( gWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
         if (gRenderer == NULL)
         {
             printf("Renderer could not be created! SDL Error: %s\n", SDL_GetError() );
@@ -110,39 +92,22 @@ bool loadMedia()
         printf( "Failed to load lazy font! SDL_ttf Error: %s\n", TTF_GetError() );
         success = false;
     }
-    else
-    {
-        SDL_Color textColor = { 0, 0, 0 };
-        if(!loadLTextureFromRenderedText(&gTextTexture, gRenderer, "The quick brown fox jumps over the lazy dog", gFont, textColor ))
-        {
-            printf( "Failed to render text texture!\n" );
-            success = false;
-        }
-    }
 
-    initLTexture(&gButtonTextureMap);
-    loadLTextureFromFile(&gButtonTextureMap, gRenderer, "../resources/button.png");
+    LTextureInit(&gTextureCharacter);
+    LTextureLoadFromFile(&gTextureCharacter, gRenderer, "../resources/character.png");
 
-    setLTextureBlendMode(&gTextTexture, SDL_BLENDMODE_BLEND);
+    LTextureInit(&gTextureBackground);
+    LTextureLoadFromFile(&gTextureBackground, gRenderer, "../resources/background.png");
 
-    for (int i = 0; i<TOTAL_BUTTONS;i++){
-        initLButton(&buttons[i], gRenderer, &gButtonTextureMap);
-    }
-
-
-    //Set buttons in corners
-    LButtonSetPosition(&buttons[0],0,0);
-    LButtonSetPosition(&buttons[1],SCREEN_WIDTH - BUTTON_DEFAULT_WIDTH, 0);
-    LButtonSetPosition(&buttons[2],0, SCREEN_HEIGHT - BUTTON_DEFAULT_HEIGHT);
-    LButtonSetPosition(&buttons[3],SCREEN_WIDTH - BUTTON_DEFAULT_WIDTH, SCREEN_HEIGHT - BUTTON_DEFAULT_HEIGHT);
+    LTextureSetBlendMode(&gTextureCharacter, SDL_BLENDMODE_BLEND);
 
     return success;
 }
 
 void closeGame() {
 
-    freeLTexture(&gButtonTextureMap);
-    freeLTexture(&gTextTexture);
+    LTextureFree(&gTextureCharacter);
+    LTextureFree(&gTextureBackground);
 
     //Free global font
     TTF_CloseFont( gFont );
@@ -197,7 +162,7 @@ int main( int argc, char* args[] )
                 }
 
                 float avgFPS = (float)countedFrames / ((float)LTimerGetTicks(&fpsTimer)/1000.f);
-                if(avgFPS > 2000000)
+                if(avgFPS > 144)
                 {
                     avgFPS = 0.f;
                 }
@@ -205,18 +170,11 @@ int main( int argc, char* args[] )
                 SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
                 SDL_RenderClear(gRenderer);
 
-                sprintf(timeText, "Time since start: %.3f",avgFPS);
-                loadLTextureFromRenderedText(&gTextTexture,gRenderer,timeText,gFont,textColor);
-                renderLTexture(&gTextTexture,100,100,NULL);
+                LTextureRender(&gTextureBackground,0,0,NULL);
+                LTextureRender(&gTextureCharacter, 100,100,NULL);
+
                 SDL_RenderPresent(gRenderer);
                 countedFrames++;
-
-                int frameTicks = LTimerGetTicks(&capTimer);
-                if( frameTicks < SCREEN_TICKS_PER_FRAME )
-                {
-                    //Wait remaining time
-                    SDL_Delay( SCREEN_TICKS_PER_FRAME - frameTicks );
-                }
             }
         }
     }

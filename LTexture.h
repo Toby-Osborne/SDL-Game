@@ -19,18 +19,18 @@ struct LTexture
     int mHeight;
 };
 
-void initLTexture(struct LTexture *texture);
+void LTextureInit(struct LTexture *texture);
 
-void freeLTexture(struct LTexture *texture);
+void LTextureFree(struct LTexture *texture);
 
-void setLTextureBlendMode(struct LTexture *texture, SDL_BlendMode blending);
+void LTextureSetBlendMode(struct LTexture *texture, SDL_BlendMode blending);
 
-void setLTextureAlpha(struct LTexture *texture, uint8_t alpha);
+void LTextureSetAlpha(struct LTexture *texture, uint8_t alpha);
 
-bool loadLTextureFromFile(struct LTexture *texture, SDL_Renderer* gRenderer, char* path);
+bool LTextureLoadFromFile(struct LTexture *texture, SDL_Renderer* gRenderer, char* path);
 
-bool loadLTextureFromRenderedText(struct LTexture *texture, SDL_Renderer* gRenderer, char *text, TTF_Font *font, SDL_Color textColor);
+bool LTextureLoadFromRenderedText(struct LTexture *texture, SDL_Renderer* gRenderer, char *text, TTF_Font *font, SDL_Color textColor);
 
-void renderLTexture(struct LTexture *texture, int x, int y, SDL_Rect* clip);
+void LTextureRender(struct LTexture *texture, int x, int y, SDL_Rect* clip);
 
 #endif //SDLGAME_LTEXTURE_H

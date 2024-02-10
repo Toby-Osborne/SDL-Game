@@ -98,5 +98,6 @@ void LButtonHandleEvent(struct LButton* button, SDL_Event* e)
 
 void LButtonRender(struct LButton* button)
 {
-    renderLTexture(button->buttonTexture,button->mPosition.x, button->mPosition.y, &gSpriteClips[button->mCurrentSprite]);
+    LTextureRender(button->buttonTexture, button->mPosition.x, button->mPosition.y,
+                   &gSpriteClips[button->mCurrentSprite]);
 }
