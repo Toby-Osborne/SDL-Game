@@ -11,7 +11,7 @@ void initLTexture(struct LTexture *texture)
     texture->mHeight = 0;
 }
 
-bool loadLTexture(struct LTexture *texture, SDL_Renderer* gRenderer, char* path)
+bool loadLTextureFromFile(struct LTexture *texture, SDL_Renderer* gRenderer, char* path)
 {
     freeLTexture(texture);
 
@@ -40,6 +40,11 @@ bool loadLTexture(struct LTexture *texture, SDL_Renderer* gRenderer, char* path)
     }
     texture->mTexture = newTexture;
     return texture->mTexture != NULL;
+}
+
+bool loadLTextureFromRenderedText(struct LTexture *texture, char *text, SDL_Color textColor)
+{
+
 }
 
 void freeLTexture(struct LTexture *texture)

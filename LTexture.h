@@ -25,7 +25,9 @@ void setLTextureBlendMode(struct LTexture *texture, SDL_BlendMode blending);
 
 void setLTextureAlpha(struct LTexture *texture, uint8_t alpha);
 
-bool loadLTexture(struct LTexture *texture, SDL_Renderer* gRenderer, char* path);
+bool loadLTextureFromFile(struct LTexture *texture, SDL_Renderer* gRenderer, char* path);
+
+bool loadLTextureFromRenderedText(struct LTexture *texture, char *text, SDL_Color textColor);
 
 void renderLTexture(struct LTexture *texture, int x, int y, SDL_Rect* clip);
 
