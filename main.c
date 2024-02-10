@@ -170,7 +170,12 @@ int main( int argc, char* args[] )
         else
         {
             bool quit = false;
-            int counter = 0;
+
+            uint32_t startTime = 0;
+            char timeText[100] = {0};
+
+            SDL_Color textColor = {0, 0, 0, 255};   // Black
+
             SDL_Event e;
 
             while (!quit) {
@@ -178,11 +183,15 @@ int main( int argc, char* args[] )
                     if (e.type == SDL_QUIT) {
                         quit = true;
                     }
-                    //Handle button events
-                    for( int i = 0; i < TOTAL_BUTTONS; ++i )
+                    else if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_RETURN)
                     {
-                        LButtonHandleEvent(&buttons[i],&e);
+                        startTime = SDL_GetTicks();
                     }
+//                    //Handle button events
+//                    for( int i = 0; i < TOTAL_BUTTONS; ++i )
+//                    {
+//                        LButtonHandleEvent(&buttons[i],&e);
+//                    }
                 }
 
                 SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
@@ -190,10 +199,13 @@ int main( int argc, char* args[] )
 
                 //Render top left sprite
 //                renderLTexture(&gTextTexture, (SCREEN_WIDTH - gTextTexture.mWidth)/2, (SCREEN_HEIGHT - gTextTexture.mHeight)/2, NULL);
-                for (int i = 0; i < TOTAL_BUTTONS;i++)
-                {
-                    LButtonRender(&buttons[i]);
-                }
+//                for (int i = 0; i < TOTAL_BUTTONS;i++)
+//                {
+//                    LButtonRender(&buttons[i]);
+//                }
+                sprintf(timeText, "Time since start: %d",SDL_GetTicks()-startTime);
+                loadLTextureFromRenderedText(&gTextTexture,gRenderer,timeText,gFont,textColor);
+                renderLTexture(&gTextTexture,100,100,NULL);
                 SDL_RenderPresent(gRenderer);
             }
         }
