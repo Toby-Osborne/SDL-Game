@@ -42,9 +42,38 @@ bool loadLTextureFromFile(struct LTexture *texture, SDL_Renderer* gRenderer, cha
     return texture->mTexture != NULL;
 }
 
-bool loadLTextureFromRenderedText(struct LTexture *texture, char *text, SDL_Color textColor)
+bool loadLTextureFromRenderedText(struct LTexture *texture, SDL_Renderer* gRenderer, char *text, TTF_Font *font, SDL_Color textColor)
 {
+//Get rid of preexisting texture
+    freeLTexture(texture);
 
+    //Render text surface
+    SDL_Surface* textSurface = TTF_RenderText_Solid( font, text, textColor );
+    if( textSurface == NULL )
+    {
+        printf( "Unable to render text surface! SDL_ttf Error: %s\n", TTF_GetError() );
+    }
+    else
+    {
+        //Create texture from surface pixels
+        texture->mTexture = SDL_CreateTextureFromSurface( gRenderer, textSurface );
+        if( texture->mTexture == NULL )
+        {
+            printf( "Unable to create texture from rendered text! SDL Error: %s\n", SDL_GetError() );
+        }
+        else
+        {
+            texture->mRenderer = gRenderer;
+            texture->mWidth = textSurface->w;
+            texture->mHeight = textSurface->h;
+        }
+
+        //Get rid of old surface
+        SDL_FreeSurface( textSurface );
+    }
+
+    //Return success
+    return texture->mTexture != NULL;
 }
 
 void freeLTexture(struct LTexture *texture)

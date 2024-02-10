@@ -34,10 +34,9 @@ SDL_Window* gWindow = NULL;
 //Renderer for textures
 SDL_Renderer* gRenderer = NULL;
 
-#define WALKING_ANIMATION_FRAMES 4
-SDL_Rect gSpriteClips[WALKING_ANIMATION_FRAMES];
+TTF_Font* gFont = NULL;
 
-struct LTexture gWalkingTexture;
+struct LTexture gTextTexture;
 
 bool init()
 {
@@ -50,34 +49,39 @@ bool init()
         printf( "SDL could not initialize! SDL Error: %s\n", SDL_GetError() );
         success = false;
     }
+
+    //Initialize SDL_ttf
+    if( TTF_Init() == -1 )
+    {
+        printf( "SDL_ttf could not initialize! SDL_ttf Error: %s\n", TTF_GetError() );
+        success = false;
+    }
+
+    //Create window
+    gWindow = SDL_CreateWindow( "C Game", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN );
+    if( gWindow == NULL )
+    {
+        printf( "Window could not be created! SDL Error: %s\n", SDL_GetError() );
+        success = false;
+    }
     else
     {
-        //Create window
-        gWindow = SDL_CreateWindow( "C Game", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN );
-        if( gWindow == NULL )
+
+        gRenderer = SDL_CreateRenderer( gWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+        if (gRenderer == NULL)
         {
-            printf( "Window could not be created! SDL Error: %s\n", SDL_GetError() );
+            printf("Renderer could not be created! SDL Error: %s\n", SDL_GetError() );
             success = false;
         }
         else
         {
-
-            gRenderer = SDL_CreateRenderer( gWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-            if (gRenderer == NULL)
+            SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
+            //Initialize PNG loading
+            int imgFlags = IMG_INIT_PNG;
+            if( !( IMG_Init( imgFlags ) & imgFlags ) )
             {
-                printf("Renderer could not be created! SDL Error: %s\n", SDL_GetError() );
+                printf( "SDL_image could not initialize! SDL_image Error: %s\n", IMG_GetError() );
                 success = false;
-            }
-            else
-            {
-                SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
-                //Initialize PNG loading
-                int imgFlags = IMG_INIT_PNG;
-                if( !( IMG_Init( imgFlags ) & imgFlags ) )
-                {
-                    printf( "SDL_image could not initialize! SDL_image Error: %s\n", IMG_GetError() );
-                    success = false;
-                }
             }
         }
     }
@@ -90,43 +94,33 @@ bool loadMedia()
     //Loading success flag
     bool success = true;
 
-    // Load FOO Texture
-    initLTexture(&gWalkingTexture);
-    if (!loadLTextureFromFile(&gWalkingTexture, gRenderer, "../resources/walk.png"))
+    gFont = TTF_OpenFont("../resources/lazy.ttf", 28);
+    if (gFont == NULL)
     {
-        printf( "Failed to load Foo' texture image!\n" );
+        printf( "Failed to load lazy font! SDL_ttf Error: %s\n", TTF_GetError() );
         success = false;
-    };
+    }
+    else
+    {
+        SDL_Color textColor = { 0, 0, 0 };
+        if(!loadLTextureFromRenderedText(&gTextTexture, gRenderer, "The quick brown fox jumps over the lazy dog", gFont, textColor ))
+        {
+            printf( "Failed to render text texture!\n" );
+            success = false;
+        }
+    }
 
-    setLTextureBlendMode(&gWalkingTexture, SDL_BLENDMODE_BLEND);
-
-    //Set sprite clips
-    gSpriteClips[ 0 ].x =   0;
-    gSpriteClips[ 0 ].y =   0;
-    gSpriteClips[ 0 ].w =  64;
-    gSpriteClips[ 0 ].h = 205;
-
-    gSpriteClips[ 1 ].x =  64;
-    gSpriteClips[ 1 ].y =   0;
-    gSpriteClips[ 1 ].w =  64;
-    gSpriteClips[ 1 ].h = 205;
-
-    gSpriteClips[ 2 ].x = 128;
-    gSpriteClips[ 2 ].y =   0;
-    gSpriteClips[ 2 ].w =  64;
-    gSpriteClips[ 2 ].h = 205;
-
-    gSpriteClips[ 3 ].x = 192;
-    gSpriteClips[ 3 ].y =   0;
-    gSpriteClips[ 3 ].w =  64;
-    gSpriteClips[ 3 ].h = 205;
-
+    setLTextureBlendMode(&gTextTexture, SDL_BLENDMODE_BLEND);
     return success;
 }
 
 void closeGame() {
 
-    freeLTexture(&gWalkingTexture);
+    freeLTexture(&gTextTexture);
+
+    //Free global font
+    TTF_CloseFont( gFont );
+    gFont = NULL;
 
     //Destroy window
     SDL_DestroyRenderer( gRenderer );
@@ -135,6 +129,7 @@ void closeGame() {
     gRenderer = NULL;
 
     //Quit SDL subsystems
+    TTF_Quit();
     IMG_Quit();
     SDL_Quit();
 }
@@ -168,8 +163,7 @@ int main( int argc, char* args[] )
 
                 //Render top left sprite
 
-                renderLTexture(&gWalkingTexture,100,100,&gSpriteClips[counter/4]);
-                counter = (counter+1)%(4*WALKING_ANIMATION_FRAMES);
+                renderLTexture(&gTextTexture, (SCREEN_WIDTH - gTextTexture.mWidth)/2, (SCREEN_HEIGHT - gTextTexture.mHeight)/2, NULL);
 
                 SDL_RenderPresent(gRenderer);
             }

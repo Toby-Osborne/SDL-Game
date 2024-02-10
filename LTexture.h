@@ -7,6 +7,8 @@
 
 #include <SDL.h>
 #include <SDL_image.h>
+#include <SDL_ttf.h>
+
 #include <stdbool.h>
 
 struct LTexture
@@ -27,7 +29,7 @@ void setLTextureAlpha(struct LTexture *texture, uint8_t alpha);
 
 bool loadLTextureFromFile(struct LTexture *texture, SDL_Renderer* gRenderer, char* path);
 
-bool loadLTextureFromRenderedText(struct LTexture *texture, char *text, SDL_Color textColor);
+bool loadLTextureFromRenderedText(struct LTexture *texture, SDL_Renderer* gRenderer, char *text, TTF_Font *font, SDL_Color textColor);
 
 void renderLTexture(struct LTexture *texture, int x, int y, SDL_Rect* clip);
 
