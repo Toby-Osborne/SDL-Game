@@ -37,8 +37,9 @@ SDL_Surface* gScreenSurface = NULL;
 //Renderer for textures
 SDL_Renderer* gRenderer = NULL;
 
-struct LTexture gFooTexture;
-struct LTexture gBackgroundTexture;
+SDL_Rect gSpriteClips[4];
+
+struct LTexture gSpriteSheetTexture;
 
 bool init()
 {
@@ -63,7 +64,7 @@ bool init()
         else
         {
 
-            gRenderer = SDL_CreateRenderer( gWindow, -1, SDL_RENDERER_ACCELERATED);
+            gRenderer = SDL_CreateRenderer( gWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
             if (gRenderer == NULL)
             {
                 printf("Renderer could not be created! SDL Error: %s\n", SDL_GetError() );
@@ -97,28 +98,45 @@ bool loadMedia()
     bool success = true;
 
     // Load FOO Texture
-    initLTexture(&gFooTexture);
-    if (!loadLTexture(&gFooTexture, gRenderer, "../resources/foo.png"))
+    initLTexture(&gSpriteSheetTexture);
+    if (!loadLTexture(&gSpriteSheetTexture, gRenderer, "../resources/sprites.png"))
     {
         printf( "Failed to load Foo' texture image!\n" );
         success = false;
     };
 
-    // Load Background Texture
-    initLTexture(&gBackgroundTexture);
-    if (!loadLTexture(&gBackgroundTexture, gRenderer, "../resources/background.png"))
-    {
-        printf( "Failed to load background texture image!\n" );
-        success = false;
-    }
+    setLTextureBlendMode(&gSpriteSheetTexture, SDL_BLENDMODE_BLEND);
+
+    //Set top left sprite
+    gSpriteClips[ 0 ].x =   0;
+    gSpriteClips[ 0 ].y =   0;
+    gSpriteClips[ 0 ].w = 100;
+    gSpriteClips[ 0 ].h = 100;
+
+    //Set top right sprite
+    gSpriteClips[ 1 ].x = 100;
+    gSpriteClips[ 1 ].y =   0;
+    gSpriteClips[ 1 ].w = 100;
+    gSpriteClips[ 1 ].h = 100;
+
+    //Set bottom left sprite
+    gSpriteClips[ 2 ].x =   0;
+    gSpriteClips[ 2 ].y = 100;
+    gSpriteClips[ 2 ].w = 100;
+    gSpriteClips[ 2 ].h = 100;
+
+    //Set bottom right sprite
+    gSpriteClips[ 3 ].x = 100;
+    gSpriteClips[ 3 ].y = 100;
+    gSpriteClips[ 3 ].w = 100;
+    gSpriteClips[ 3 ].h = 100;
 
     return success;
 }
 
 void closeGame() {
 
-    freeLTexture(&gFooTexture);
-    freeLTexture(&gBackgroundTexture);
+    freeLTexture(&gSpriteSheetTexture);
 
     //Destroy window
     SDL_DestroyRenderer( gRenderer );
@@ -145,7 +163,7 @@ int main( int argc, char* args[] )
         else
         {
             bool quit = false;
-
+            uint8_t alpha = 255;
             SDL_Event e;
 
             while (!quit) {
@@ -153,14 +171,39 @@ int main( int argc, char* args[] )
                     if (e.type == SDL_QUIT) {
                         quit = true;
                     }
+                    else if(e.type == SDL_KEYDOWN)
+                    {
+                        switch (e.key.keysym.sym){
+                            case SDLK_w:
+                                if (alpha + 32 > 255){
+                                    alpha = 255;
+                                }
+                                else{
+                                    alpha += 32;
+                                }
+                                break;
+                            case SDLK_s:
+                                if (alpha - 32 < 0) {
+                                    alpha = 0;
+                                }
+                                else
+                                {
+                                    alpha -= 32;
+                                }
+                                break;
+                        }
+                    }
                 }
 
                 SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
                 SDL_RenderClear(gRenderer);
+                setLTextureAlpha(&gSpriteSheetTexture, alpha);
+                //Render top left sprite
+                renderLTexture(&gSpriteSheetTexture,0,0,&gSpriteClips[0]);
+                renderLTexture(&gSpriteSheetTexture,SCREEN_WIDTH-gSpriteClips[1].w,0,&gSpriteClips[1]);
+                renderLTexture(&gSpriteSheetTexture,0,SCREEN_HEIGHT-gSpriteClips[2].h,&gSpriteClips[2]);
+                renderLTexture(&gSpriteSheetTexture,SCREEN_WIDTH-gSpriteClips[3].w,SCREEN_HEIGHT-gSpriteClips[3].h,&gSpriteClips[3]);
 
-                renderLTexture(&gBackgroundTexture, 0, 0);
-
-                renderLTexture(&gFooTexture, 240, 190);
                 SDL_RenderPresent(gRenderer);
             }
         }

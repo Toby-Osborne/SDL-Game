@@ -21,8 +21,12 @@ void initLTexture(struct LTexture *texture);
 
 void freeLTexture(struct LTexture *texture);
 
+void setLTextureBlendMode(struct LTexture *texture, SDL_BlendMode blending);
+
+void setLTextureAlpha(struct LTexture *texture, uint8_t alpha);
+
 bool loadLTexture(struct LTexture *texture, SDL_Renderer* gRenderer, char* path);
 
-void renderLTexture(struct LTexture *texture, int x, int y);
+void renderLTexture(struct LTexture *texture, int x, int y, SDL_Rect* clip);
 
 #endif //SDLGAME_LTEXTURE_H

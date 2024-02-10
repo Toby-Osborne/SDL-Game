@@ -53,10 +53,26 @@ void freeLTexture(struct LTexture *texture)
     }
 }
 
-void renderLTexture(struct LTexture *texture, int x, int y)
+void renderLTexture(struct LTexture *texture, int x, int y, SDL_Rect* clip)
 {
     // Here we create an arbitrary quad and map the texture onto it
     SDL_Rect renderQuad = {x, y, texture->mWidth, texture->mHeight};
-    SDL_RenderCopy(texture->mRenderer, texture->mTexture, NULL, &renderQuad);
+    if(clip!=NULL)
+    {
+        renderQuad.w = clip->w;
+        renderQuad.h = clip->h;
+    }
+
+    SDL_RenderCopy(texture->mRenderer, texture->mTexture, clip, &renderQuad);
+}
+
+void setLTextureBlendMode(struct LTexture *texture, SDL_BlendMode blending)
+{
+    SDL_SetTextureBlendMode(texture->mTexture, blending);
+}
+
+void setLTextureAlpha(struct LTexture *texture, uint8_t alpha)
+{
+    SDL_SetTextureAlphaMod( texture->mTexture, alpha);
 }
 
