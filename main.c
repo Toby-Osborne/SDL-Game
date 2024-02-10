@@ -7,10 +7,14 @@
 #include "main.h"
 #include "LTexture.h"
 #include "LButton.h"
+#include "LTimer.h"
 
 //Screen dimension constants
 const int SCREEN_WIDTH = 680;
 const int SCREEN_HEIGHT = 480;
+
+const int SCREEN_FPS = 60;
+const int SCREEN_TICKS_PER_FRAME = 1000 / SCREEN_FPS;
 
 //Key press surfaces constants
 enum KeyPressSurfaces
@@ -73,7 +77,7 @@ bool init()
     else
     {
 
-        gRenderer = SDL_CreateRenderer( gWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+        gRenderer = SDL_CreateRenderer( gWindow, -1, SDL_RENDERER_ACCELERATED);
         if (gRenderer == NULL)
         {
             printf("Renderer could not be created! SDL Error: %s\n", SDL_GetError() );
@@ -170,43 +174,49 @@ int main( int argc, char* args[] )
         else
         {
             bool quit = false;
-
-            uint32_t startTime = 0;
-            char timeText[100] = {0};
-
-            SDL_Color textColor = {0, 0, 0, 255};   // Black
-
             SDL_Event e;
 
+            char timeText[100] = {0};
+            SDL_Color textColor = {0, 0, 0, 255};   // Black
+
+            struct LTimer fpsTimer;
+            struct LTimer capTimer;
+
+            LTimerInit(&fpsTimer);
+            LTimerInit(&capTimer);
+            int countedFrames = 0;
+
+            LTimerAction(&fpsTimer,START);
+
             while (!quit) {
+                LTimerAction(&capTimer,START);
                 while (SDL_PollEvent(&e) != 0) {
                     if (e.type == SDL_QUIT) {
                         quit = true;
                     }
-                    else if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_RETURN)
-                    {
-                        startTime = SDL_GetTicks();
-                    }
-//                    //Handle button events
-//                    for( int i = 0; i < TOTAL_BUTTONS; ++i )
-//                    {
-//                        LButtonHandleEvent(&buttons[i],&e);
-//                    }
+                }
+
+                float avgFPS = (float)countedFrames / ((float)LTimerGetTicks(&fpsTimer)/1000.f);
+                if(avgFPS > 2000000)
+                {
+                    avgFPS = 0.f;
                 }
 
                 SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
                 SDL_RenderClear(gRenderer);
 
-                //Render top left sprite
-//                renderLTexture(&gTextTexture, (SCREEN_WIDTH - gTextTexture.mWidth)/2, (SCREEN_HEIGHT - gTextTexture.mHeight)/2, NULL);
-//                for (int i = 0; i < TOTAL_BUTTONS;i++)
-//                {
-//                    LButtonRender(&buttons[i]);
-//                }
-                sprintf(timeText, "Time since start: %d",SDL_GetTicks()-startTime);
+                sprintf(timeText, "Time since start: %.3f",avgFPS);
                 loadLTextureFromRenderedText(&gTextTexture,gRenderer,timeText,gFont,textColor);
                 renderLTexture(&gTextTexture,100,100,NULL);
                 SDL_RenderPresent(gRenderer);
+                countedFrames++;
+
+                int frameTicks = LTimerGetTicks(&capTimer);
+                if( frameTicks < SCREEN_TICKS_PER_FRAME )
+                {
+                    //Wait remaining time
+                    SDL_Delay( SCREEN_TICKS_PER_FRAME - frameTicks );
+                }
             }
         }
     }

@@ -7,7 +7,9 @@ add_executable(SDL2Test main.c main.h
         LTexture.c
         LTexture.h
         LButton.c
-        LButton.h)
+        LButton.h
+        LTimer.c
+        LTimer.h)
 
 INCLUDE(FindPkgConfig)
 
