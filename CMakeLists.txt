@@ -3,7 +3,9 @@ project(SDLGame C)
 
 set(CMAKE_C_STANDARD 11)
 
-add_executable(SDL2Test main.c main.h)
+add_executable(SDL2Test main.c main.h
+        LTexture.c
+        LTexture.h)
 
 INCLUDE(FindPkgConfig)
 

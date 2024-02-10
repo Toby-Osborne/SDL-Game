@@ -3,11 +3,13 @@
 #include <SDL_image.h>
 #include <stdio.h>
 #include <string.h>
+
 #include "main.h"
+#include "LTexture.h"
 
 //Screen dimension constants
-const int SCREEN_WIDTH = 1920;
-const int SCREEN_HEIGHT = 1080;
+const int SCREEN_WIDTH = 680;
+const int SCREEN_HEIGHT = 480;
 
 //Key press surfaces constants
 enum KeyPressSurfaces
@@ -32,16 +34,11 @@ SDL_Window* gWindow = NULL;
 //The surface contained by the window
 SDL_Surface* gScreenSurface = NULL;
 
-//Current displayed image
-SDL_Surface* gMeForReal = NULL;
-
 //Renderer for textures
 SDL_Renderer* gRenderer = NULL;
 
-SDL_Texture* gTexture = NULL;
-
-//Texture to render to window
-SDL_Texture* loadTexture( char* path);
+struct LTexture gFooTexture;
+struct LTexture gBackgroundTexture;
 
 bool init()
 {
@@ -57,7 +54,7 @@ bool init()
     else
     {
         //Create window
-        gWindow = SDL_CreateWindow( "SDL Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN );
+        gWindow = SDL_CreateWindow( "C Game", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN );
         if( gWindow == NULL )
         {
             printf( "Window could not be created! SDL Error: %s\n", SDL_GetError() );
@@ -94,37 +91,24 @@ bool init()
     return success;
 }
 
-SDL_Texture* loadTexture( char* path )
-{
-    SDL_Texture* newTexture = NULL;
-
-    SDL_Surface* loadedSurface = IMG_Load( path );
-
-    if (loadedSurface == NULL)
-    {
-        printf( "Unable to load image %s! SDL_image Error: %s\n", path, IMG_GetError() );
-    }
-    else
-    {
-        newTexture = SDL_CreateTextureFromSurface (gRenderer, loadedSurface);
-        if(newTexture==NULL)
-        {
-            printf( "Unable to create texture from %s! SDL Error: %s\n", path, SDL_GetError() );
-        }
-        SDL_FreeSurface( loadedSurface );
-    }
-    return newTexture;
-}
-
 bool loadMedia()
 {
     //Loading success flag
     bool success = true;
 
-    gTexture = loadTexture("../resources/mefr.png");
-    if( gTexture == NULL )
+    // Load FOO Texture
+    initLTexture(&gFooTexture);
+    if (!loadLTexture(&gFooTexture, gRenderer, "../resources/foo.png"))
     {
-        printf( "Failed to load texture from image!\n");
+        printf( "Failed to load Foo' texture image!\n" );
+        success = false;
+    };
+
+    // Load Background Texture
+    initLTexture(&gBackgroundTexture);
+    if (!loadLTexture(&gBackgroundTexture, gRenderer, "../resources/background.png"))
+    {
+        printf( "Failed to load background texture image!\n" );
         success = false;
     }
 
@@ -133,9 +117,8 @@ bool loadMedia()
 
 void closeGame() {
 
-    //Free loaded image
-    SDL_DestroyTexture( gTexture );
-    gTexture = NULL;
+    freeLTexture(&gFooTexture);
+    freeLTexture(&gBackgroundTexture);
 
     //Destroy window
     SDL_DestroyRenderer( gRenderer );
@@ -165,24 +148,6 @@ int main( int argc, char* args[] )
 
             SDL_Event e;
 
-            SDL_Rect topLeftViewport;
-            topLeftViewport.x = 0;
-            topLeftViewport.y = 0;
-            topLeftViewport.h = SCREEN_HEIGHT/2;
-            topLeftViewport.w = SCREEN_WIDTH/2;
-
-            SDL_Rect topRightViewport;
-            topRightViewport.x = SCREEN_WIDTH/2;
-            topRightViewport.y = 0;
-            topRightViewport.h = SCREEN_HEIGHT/2;
-            topRightViewport.w = SCREEN_WIDTH/2;
-
-            SDL_Rect bottomViewport;
-            bottomViewport.x = 0;
-            bottomViewport.y = SCREEN_HEIGHT/2;
-            bottomViewport.w = SCREEN_WIDTH;
-            bottomViewport.h = SCREEN_HEIGHT/2;
-
             while (!quit) {
                 while (SDL_PollEvent(&e) != 0) {
                     if (e.type == SDL_QUIT) {
@@ -190,20 +155,13 @@ int main( int argc, char* args[] )
                     }
                 }
 
-                SDL_RenderClear(gRenderer);
                 SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
+                SDL_RenderClear(gRenderer);
 
-                SDL_RenderSetViewport(gRenderer, &topLeftViewport);
-                SDL_RenderCopy( gRenderer, gTexture, NULL, NULL);
+                renderLTexture(&gBackgroundTexture, gRenderer, 0, 0);
 
-                SDL_RenderSetViewport(gRenderer, &topRightViewport);
-                SDL_RenderCopy( gRenderer, gTexture, NULL, NULL);
-
-                SDL_RenderSetViewport(gRenderer, &bottomViewport);
-                SDL_RenderCopy( gRenderer, gTexture, NULL, NULL);
-
-                SDL_RenderPresent( gRenderer );
-
+                renderLTexture(&gFooTexture, gRenderer, 240, 190);
+                SDL_RenderPresent(gRenderer);
             }
         }
     }
