@@ -4,6 +4,8 @@
 
 #include "LTexture.h"
 
+#define MAX_TEXTURES 5
+
 void LTextureInit(struct LTexture *texture)
 {
     texture->mTexture = NULL;
@@ -11,8 +13,29 @@ void LTextureInit(struct LTexture *texture)
     texture->mHeight = 0;
 }
 
+
+struct LTexture * textures[MAX_TEXTURES] = {NULL};
+
 bool LTextureLoadFromFile(struct LTexture *texture, SDL_Renderer* gRenderer, char* path)
 {
+    // Register texture object
+    for (int i = 0;i<MAX_TEXTURES+1;i++){
+        if (i == MAX_TEXTURES)
+        {
+            return false;
+        }
+
+        if (texture == textures[i])
+        {
+            break;
+        }
+        if (textures[i] == 0)
+        {
+            textures[i] = texture;
+            break;
+        }
+    }
+
     LTextureFree(texture);
 
     SDL_Texture* newTexture = NULL;
@@ -110,3 +133,10 @@ void LTextureSetAlpha(struct LTexture *texture, uint8_t alpha)
     SDL_SetTextureAlphaMod( texture->mTexture, alpha);
 }
 
+void FreeTextures()
+{
+     for (int i = 0;i<MAX_TEXTURES;i++)
+    {
+        if (textures[i] != NULL) LTextureFree(textures[i]);
+    }
+}

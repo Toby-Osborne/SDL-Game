@@ -8,10 +8,8 @@
 #include "LTexture.h"
 #include "LButton.h"
 #include "LTimer.h"
+#include "Player.h"
 
-//Screen dimension constants
-const int SCREEN_WIDTH = 600;
-const int SCREEN_HEIGHT = 480;
 
 //Starts up SDL and creates window
 bool init();
@@ -77,7 +75,6 @@ bool init()
             }
         }
     }
-
     return success;
 }
 
@@ -86,7 +83,7 @@ bool loadMedia()
     //Loading success flag
     bool success = true;
 
-    gFont = TTF_OpenFont("../resources/lazy.ttf", 28);
+    gFont = TTF_OpenFont("resources/lazy.ttf", 28);
     if (gFont == NULL)
     {
         printf( "Failed to load lazy font! SDL_ttf Error: %s\n", TTF_GetError() );
@@ -94,10 +91,10 @@ bool loadMedia()
     }
 
     LTextureInit(&gTextureCharacter);
-    LTextureLoadFromFile(&gTextureCharacter, gRenderer, "../resources/character.png");
+    LTextureLoadFromFile(&gTextureCharacter, gRenderer, "resources/character.png");
 
     LTextureInit(&gTextureBackground);
-    LTextureLoadFromFile(&gTextureBackground, gRenderer, "../resources/background.png");
+    LTextureLoadFromFile(&gTextureBackground, gRenderer, "resources/background.png");
 
     LTextureSetBlendMode(&gTextureCharacter, SDL_BLENDMODE_BLEND);
 
@@ -106,8 +103,7 @@ bool loadMedia()
 
 void closeGame() {
 
-    LTextureFree(&gTextureCharacter);
-    LTextureFree(&gTextureBackground);
+    FreeTextures();
 
     //Free global font
     TTF_CloseFont( gFont );
@@ -141,9 +137,6 @@ int main( int argc, char* args[] )
             bool quit = false;
             SDL_Event e;
 
-            char timeText[100] = {0};
-            SDL_Color textColor = {0, 0, 0, 255};   // Black
-
             struct LTimer fpsTimer;
             struct LTimer capTimer;
 
@@ -153,12 +146,15 @@ int main( int argc, char* args[] )
 
             LTimerAction(&fpsTimer,START);
 
+            PlayerInit(gRenderer, &gTextureCharacter);
+
             while (!quit) {
                 LTimerAction(&capTimer,START);
                 while (SDL_PollEvent(&e) != 0) {
                     if (e.type == SDL_QUIT) {
                         quit = true;
                     }
+                    PlayerHandleEvent(&e);
                 }
 
                 float avgFPS = (float)countedFrames / ((float)LTimerGetTicks(&fpsTimer)/1000.f);
@@ -170,9 +166,11 @@ int main( int argc, char* args[] )
                 SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
                 SDL_RenderClear(gRenderer);
 
-                LTextureRender(&gTextureBackground,0,0,NULL);
-                LTextureRender(&gTextureCharacter, 100,100,NULL);
+                PlayerProcessMovement();
 
+                LTextureRender(&gTextureBackground,0,0,NULL);
+//                LTextureRender(&gTextureCharacter, 100,100,NULL);
+                PlayerRender();
                 SDL_RenderPresent(gRenderer);
                 countedFrames++;
             }

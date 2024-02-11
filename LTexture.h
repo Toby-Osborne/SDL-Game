@@ -19,6 +19,8 @@ struct LTexture
     int mHeight;
 };
 
+void FreeTextures();
+
 void LTextureInit(struct LTexture *texture);
 
 void LTextureFree(struct LTexture *texture);

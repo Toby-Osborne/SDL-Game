@@ -7,5 +7,8 @@
 
 #include <stdbool.h>
 
+//Screen dimension constants
+static const int SCREEN_WIDTH = 600;
+static const int SCREEN_HEIGHT = 480;
 
 #endif //SDLGAME_MAIN_H
