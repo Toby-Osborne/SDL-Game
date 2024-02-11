@@ -9,8 +9,10 @@
 void LTextureInit(struct LTexture *texture)
 {
     texture->mTexture = NULL;
+    texture->mRenderer = NULL;
     texture->mWidth = 0;
     texture->mHeight = 0;
+    texture->mScale = 1.f;
 }
 
 
@@ -108,6 +110,12 @@ void LTextureFree(struct LTexture *texture)
         texture->mWidth = 0;
         texture->mHeight = 0;
     }
+}
+
+//TODO: use scale to stretch the texture
+void LTextureScale(struct LTexture *texture, float scale)
+{
+    texture->mScale = scale;
 }
 
 void LTextureRender(struct LTexture *texture, int x, int y, SDL_Rect* clip)

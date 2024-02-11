@@ -15,6 +15,7 @@ struct LTexture
 {
     SDL_Texture* mTexture;
     SDL_Renderer* mRenderer;
+    float mScale;
     int mWidth;
     int mHeight;
 };

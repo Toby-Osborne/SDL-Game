@@ -94,7 +94,7 @@ bool loadMedia()
     LTextureLoadFromFile(&gTextureCharacter, gRenderer, "resources/character.png");
 
     LTextureInit(&gTextureBackground);
-    LTextureLoadFromFile(&gTextureBackground, gRenderer, "resources/bg.png");
+    LTextureLoadFromFile(&gTextureBackground, gRenderer, "resources/bg-tiled.png");
 
     LTextureSetBlendMode(&gTextureCharacter, SDL_BLENDMODE_BLEND);
 
@@ -166,12 +166,6 @@ int main( int argc, char* args[] )
                     PlayerHandleEvent(&e);
                 }
 
-                float avgFPS = (float)countedFrames / ((float)LTimerGetTicks(&fpsTimer)/1000.f);
-                if(avgFPS > 144)
-                {
-                    avgFPS = 0.f;
-                }
-
                 SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
                 SDL_RenderClear(gRenderer);
 
@@ -200,11 +194,15 @@ int main( int argc, char* args[] )
                     camera.y = LEVEL_HEIGHT - camera.h;
                 }
 
+                // Draw Background
+
                 SDL_Rect wall_render = {wall.x - camera.x, wall.y - camera.y, wall.w, wall.h};
 
                 PlayerProcessMovement(&wall);
 
-                LTextureRender(&gTextureBackground,0,0,&camera);
+                SDL_Rect background_render = {camera.x%512, camera.y, camera.w, camera.h};
+                LTextureRender(&gTextureBackground,0,0,&background_render);
+
                 SDL_SetRenderDrawColor(gRenderer, 0x0,0x0,0x0,0xFF);
                 SDL_RenderDrawRect(gRenderer, &wall_render);
 
