@@ -13,7 +13,9 @@ add_executable(SDL2Test main.c main.h
         Player.c
         Player.h
         physics.c
-        physics.h)
+        physics.h
+        LCamera.c
+        LCamera.h)
 
 INCLUDE(FindPkgConfig)
 

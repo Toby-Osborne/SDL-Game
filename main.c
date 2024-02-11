@@ -9,6 +9,7 @@
 #include "LButton.h"
 #include "LTimer.h"
 #include "Player.h"
+#include "LCamera.h"
 
 
 //Starts up SDL and creates window
@@ -137,28 +138,10 @@ int main( int argc, char* args[] )
             bool quit = false;
             SDL_Event e;
 
-            struct LTimer fpsTimer;
-            struct LTimer capTimer;
-
-            LTimerInit(&fpsTimer);
-            LTimerInit(&capTimer);
-            int countedFrames = 0;
-
-            // Wall
-            SDL_Rect wall;
-            wall.x = 300;
-            wall.y = 40;
-            wall.w = 40;
-            wall.h = 400;
-
-            SDL_Rect camera = {0,0,SCREEN_WIDTH,SCREEN_HEIGHT};
-
-            LTimerAction(&fpsTimer,START);
-
+            SDL_Rect *camera = LCameraGetCamera();
             PlayerInit(gRenderer, &gTextureCharacter);
 
             while (!quit) {
-                LTimerAction(&capTimer,START);
                 while (SDL_PollEvent(&e) != 0) {
                     if (e.type == SDL_QUIT) {
                         quit = true;
@@ -166,49 +149,17 @@ int main( int argc, char* args[] )
                     PlayerHandleEvent(&e);
                 }
 
+                PlayerProcessMovement();
+
                 SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
                 SDL_RenderClear(gRenderer);
 
-                camera.x = ( PlayerGetX() + DOT_WIDTH / 2 ) - SCREEN_WIDTH / 2;
-                camera.y = ( PlayerGetY() + DOT_HEIGHT / 2 ) - SCREEN_HEIGHT / 2;
-
-                //Center the camera over the dot
-                camera.x = ( PlayerGetX() + DOT_WIDTH / 2 ) - SCREEN_WIDTH / 2;
-                camera.y = ( PlayerGetY() + DOT_HEIGHT / 2 ) - SCREEN_HEIGHT / 2;
-
-                //Keep the camera in bounds
-                if( camera.x < 0 )
-                {
-                    camera.x = 0;
-                }
-                if( camera.y < 0 )
-                {
-                    camera.y = 0;
-                }
-                if( camera.x > LEVEL_WIDTH - camera.w )
-                {
-                    camera.x = LEVEL_WIDTH - camera.w;
-                }
-                if( camera.y > LEVEL_HEIGHT - camera.h )
-                {
-                    camera.y = LEVEL_HEIGHT - camera.h;
-                }
-
                 // Draw Background
-
-                SDL_Rect wall_render = {wall.x - camera.x, wall.y - camera.y, wall.w, wall.h};
-
-                PlayerProcessMovement(&wall);
-
-                SDL_Rect background_render = {camera.x%512, camera.y, camera.w, camera.h};
+                SDL_Rect background_render = {camera->x%512, camera->y%512, camera->w, camera->h};
                 LTextureRender(&gTextureBackground,0,0,&background_render);
 
-                SDL_SetRenderDrawColor(gRenderer, 0x0,0x0,0x0,0xFF);
-                SDL_RenderDrawRect(gRenderer, &wall_render);
-
-                PlayerRender(camera.x, camera.y);
+                PlayerRender(camera->x, camera->y);
                 SDL_RenderPresent(gRenderer);
-                countedFrames++;
             }
         }
     }

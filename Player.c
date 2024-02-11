@@ -5,6 +5,7 @@
 #include "Player.h"
 #include "main.h"
 #include "physics.h"
+#include "LCamera.h"
 int mPosX, mPosY;
 
 int mVelX, mVelY;
@@ -53,9 +54,8 @@ void PlayerHandleEvent(SDL_Event *e)
     }
 }
 
-void PlayerProcessMovement(SDL_Rect *wall)
+void PlayerProcessMovement()
 {
-
     //Move the dot left or right
     mPosX += mVelX;
     mPosY += mVelY;
@@ -63,10 +63,8 @@ void PlayerProcessMovement(SDL_Rect *wall)
     collision_box.x = mPosX;
     collision_box.y = mPosY;
 
-    bool colliding = checkCollision(*wall, collision_box);
-
     //If the dot went too far to the left or right
-    if( ( mPosX < 0 ) || ( mPosX + DOT_WIDTH > LEVEL_WIDTH ) || colliding)
+    if( ( mPosX < 0 ) || ( mPosX + DOT_WIDTH > LEVEL_WIDTH ))
     {
         //Move back
         mPosX -= mVelX;
@@ -74,11 +72,12 @@ void PlayerProcessMovement(SDL_Rect *wall)
     //Move the dot up or down
 
     //If the dot went too far up or down
-    if( ( mPosY < 0 ) || ( mPosY + DOT_HEIGHT > LEVEL_HEIGHT ) || colliding)
+    if( ( mPosY < 0 ) || ( mPosY + DOT_HEIGHT > LEVEL_HEIGHT ))
     {
         //Move back
         mPosY -= mVelY;
     }
+    LCameraProcessMovement();
 }
 
 void PlayerRender(int camX, int camY)
