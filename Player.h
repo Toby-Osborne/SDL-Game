@@ -20,8 +20,12 @@ void PlayerInit(SDL_Renderer *renderer, struct LTexture* texture);
 
 void PlayerHandleEvent(SDL_Event *e);
 
-void PlayerProcessMovement();
+void PlayerProcessMovement(SDL_Rect *wall);
 
-void PlayerRender();
+void PlayerRender(int camX, int camY);
+
+int PlayerGetX();
+
+int PlayerGetY();
 
 #endif //SDLGAME_PLAYER_H

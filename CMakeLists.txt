@@ -11,7 +11,9 @@ add_executable(SDL2Test main.c main.h
         LTimer.c
         LTimer.h
         Player.c
-        Player.h)
+        Player.h
+        physics.c
+        physics.h)
 
 INCLUDE(FindPkgConfig)
 

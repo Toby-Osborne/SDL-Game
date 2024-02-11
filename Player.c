@@ -4,10 +4,12 @@
 
 #include "Player.h"
 #include "main.h"
-
+#include "physics.h"
 int mPosX, mPosY;
 
 int mVelX, mVelY;
+
+SDL_Rect collision_box;
 
 SDL_Renderer *pRenderer;
 
@@ -17,6 +19,10 @@ void PlayerInit(SDL_Renderer *renderer, struct LTexture* texture)
 {
     pRenderer = renderer;
     pTexture = texture;
+    collision_box.x = mPosX;
+    collision_box.y = mPosY;
+    collision_box.w = 100;
+    collision_box.h = 100;
 }
 
 void PlayerHandleEvent(SDL_Event *e)
@@ -47,30 +53,40 @@ void PlayerHandleEvent(SDL_Event *e)
     }
 }
 
-void PlayerProcessMovement()
+void PlayerProcessMovement(SDL_Rect *wall)
 {
+
     //Move the dot left or right
     mPosX += mVelX;
+    mPosY += mVelY;
+
+    collision_box.x = mPosX;
+    collision_box.y = mPosY;
+
+    bool colliding = checkCollision(*wall, collision_box);
 
     //If the dot went too far to the left or right
-    if( ( mPosX < 0 ) || ( mPosX + DOT_WIDTH > SCREEN_WIDTH ) )
+    if( ( mPosX < 0 ) || ( mPosX + DOT_WIDTH > LEVEL_WIDTH ) || colliding)
     {
         //Move back
         mPosX -= mVelX;
     }
     //Move the dot up or down
-    mPosY += mVelY;
 
     //If the dot went too far up or down
-    if( ( mPosY < 0 ) || ( mPosY + DOT_HEIGHT > SCREEN_HEIGHT ) )
+    if( ( mPosY < 0 ) || ( mPosY + DOT_HEIGHT > LEVEL_HEIGHT ) || colliding)
     {
         //Move back
         mPosY -= mVelY;
     }
 }
 
-void PlayerRender()
+void PlayerRender(int camX, int camY)
 {
     //Show the dot
-    LTextureRender(pTexture, mPosX, mPosY, NULL);
+    LTextureRender(pTexture, mPosX-camX, mPosY-camY, NULL);
 }
+
+int PlayerGetX(){ return mPosX; }
+
+int PlayerGetY() { return mPosY; }
