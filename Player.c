@@ -83,7 +83,7 @@ void PlayerProcessMovement()
 void PlayerRender(int camX, int camY)
 {
     //Show the dot
-    LTextureRender(pTexture, mPosX-camX, mPosY-camY, NULL);
+    LTextureRender(pTexture, mPosX-camX, mPosY-camY, collision_box.w, collision_box.h,NULL);
 }
 
 int PlayerGetX(){ return mPosX; }

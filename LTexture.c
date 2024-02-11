@@ -12,7 +12,6 @@ void LTextureInit(struct LTexture *texture)
     texture->mRenderer = NULL;
     texture->mWidth = 0;
     texture->mHeight = 0;
-    texture->mScale = 1.f;
 }
 
 
@@ -112,21 +111,10 @@ void LTextureFree(struct LTexture *texture)
     }
 }
 
-//TODO: use scale to stretch the texture
-void LTextureScale(struct LTexture *texture, float scale)
-{
-    texture->mScale = scale;
-}
-
-void LTextureRender(struct LTexture *texture, int x, int y, SDL_Rect* clip)
+void LTextureRender(struct LTexture *texture, int x, int y, int w, int h,SDL_Rect* clip)
 {
     // Here we create an arbitrary quad and map the texture onto it
-    SDL_Rect renderQuad = {x, y, texture->mWidth, texture->mHeight};
-    if(clip!=NULL)
-    {
-        renderQuad.w = clip->w;
-        renderQuad.h = clip->h;
-    }
+    SDL_Rect renderQuad = {x, y, w, h};
 
     SDL_RenderCopy(texture->mRenderer, texture->mTexture, clip, &renderQuad);
 }

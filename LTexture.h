@@ -15,7 +15,7 @@ struct LTexture
 {
     SDL_Texture* mTexture;
     SDL_Renderer* mRenderer;
-    float mScale;
+    bool mScaled;
     int mWidth;
     int mHeight;
 };
@@ -34,6 +34,6 @@ bool LTextureLoadFromFile(struct LTexture *texture, SDL_Renderer* gRenderer, cha
 
 bool LTextureLoadFromRenderedText(struct LTexture *texture, SDL_Renderer* gRenderer, char *text, TTF_Font *font, SDL_Color textColor);
 
-void LTextureRender(struct LTexture *texture, int x, int y, SDL_Rect* clip);
+void LTextureRender(struct LTexture *texture, int x, int y, int w, int h,SDL_Rect* clip);
 
 #endif //SDLGAME_LTEXTURE_H

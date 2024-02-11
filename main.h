@@ -15,8 +15,8 @@ static const int LEVEL_WIDTH = 8192;
 static const int LEVEL_HEIGHT = 4096;
 
 //Tile constants
-static const int TILE_WIDTH = 80;
-static const int TILE_HEIGHT = 80;
+static const int TILE_WIDTH = 128;
+static const int TILE_HEIGHT = 128;
 static const int TOTAL_TILES = 192;
 static const int TOTAL_TILE_SPRITES = 12;
 
