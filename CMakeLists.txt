@@ -10,10 +10,11 @@ add_executable(SDL2Test main.c main.h
         LTimer.h
         Player.c
         Player.h
-        physics.c
         physics.h
         LCamera.c
         LCamera.h
+        TileMap.c
+        TileMap.h
 )
 
 INCLUDE(FindPkgConfig)

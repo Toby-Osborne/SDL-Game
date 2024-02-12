@@ -60,3 +60,10 @@ uint32_t LTimerGetTicks(struct LTimer* timer)
         return SDL_GetTicks() - timer->mStartTicks;
     }
 }
+
+uint32_t LTimerStopwatch(struct LTimer* timer)
+{
+    uint32_t diff = SDL_GetTicks() - timer->mStartTicks;
+    timer->mStartTicks = SDL_GetTicks();
+    return diff;
+}

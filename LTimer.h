@@ -28,6 +28,8 @@ void LTimerAction(struct LTimer* timer, enum LTimerAction action);
 
 uint32_t LTimerGetTicks(struct LTimer* timer);
 
+uint32_t LTimerStopwatch(struct LTimer* timer);
+
 static bool LTimerStarted(struct LTimer* timer) {return timer->mStarted;}
 
 static bool LTimerPaused(struct LTimer* timer) {return timer->mPaused;}

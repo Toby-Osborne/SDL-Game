@@ -11,13 +11,6 @@
 static const int SCREEN_WIDTH = 1920;
 static const int SCREEN_HEIGHT = 1080;
 
-static const int LEVEL_WIDTH = 8192;
-static const int LEVEL_HEIGHT = 4096;
-
-//Tile constants
-static const int TILE_WIDTH = 128;
-static const int TILE_HEIGHT = 128;
-static const int TOTAL_TILES = 192;
 static const int TOTAL_TILE_SPRITES = 12;
 
 //The different tile sprites

@@ -9,6 +9,7 @@
 #include "LTimer.h"
 #include "Player.h"
 #include "LCamera.h"
+#include "TileMap.h"
 
 
 //Starts up SDL and creates window
@@ -106,6 +107,8 @@ bool loadMedia()
 
     LTextureSetBlendMode(&gTextureCharacter, SDL_BLENDMODE_BLEND);
 
+    TileMapInit(&gTextureTile,gRenderer);
+
     return success;
 }
 
@@ -129,18 +132,6 @@ void closeGame() {
     SDL_Quit();
 }
 
-struct Tile{
-    SDL_Rect *camera;
-    SDL_Rect mPos;
-    int mType;
-};
-
-SDL_Rect tileClip = {0, 0, 512, 512};
-void TileRender(struct Tile* tile)
-{
-    LTextureRender(&gTextureTile,tile->mPos.x-tile->camera->x,tile->mPos.y-tile->camera->y,128,128,&tileClip);
-}
-
 int main( int argc, char* args[] )
 {
     if (!init()) {
@@ -160,16 +151,6 @@ int main( int argc, char* args[] )
             SDL_Rect *camera = LCameraGetCamera();
             PlayerInit(gRenderer, &gTextureCharacter);
 
-            struct Tile tiles[10*10];
-            for (int i = 0;i<10;i++) {
-                tiles[i].camera = LCameraGetCamera();
-                tiles[i].mPos.x = 128*i;
-                tiles[i].mPos.y = 128*5;
-                tiles[i].mPos.w = 128;
-                tiles[i].mPos.h = 128;
-                tiles[i].mType = 0;
-            }
-
             while (!quit) {
                 while (SDL_PollEvent(&e) != 0) {
                     if (e.type == SDL_QUIT) {
@@ -187,11 +168,9 @@ int main( int argc, char* args[] )
                 SDL_Rect background_render = {camera->x%512, camera->y%512, camera->w, camera->h};
                 LTextureRender(&gTextureBackground,0,0,background_render.w, background_render.h, &background_render);
 
-                for (int i = 0;i<10;i++) {
-                    TileRender(&tiles[i]);
-                }
+                TileMapRenderTiles(camera);
 
-                    PlayerRender(camera->x, camera->y);
+                PlayerRender(camera->x, camera->y);
                 SDL_RenderPresent(gRenderer);
             }
         }

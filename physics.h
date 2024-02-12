@@ -10,4 +10,6 @@
 
 bool checkCollision (SDL_Rect a, SDL_Rect b);
 
+static const float g = 0.05;
+
 #endif //SDLGAME_PHYSICS_H
