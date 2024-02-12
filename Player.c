@@ -148,7 +148,7 @@ bool PlayerCheckYCollision()
     return false;
 }
 
-const float terminal_velocity = 1.1f;
+const float terminal_velocity = 5.f;
 
 void PlayerProcessMovement()
 {
@@ -156,12 +156,11 @@ void PlayerProcessMovement()
     switch(PlayerController[UP]+(PlayerController[DOWN]<<1))
     {
         case 0:
-            mVelY *= VEL_DECAY_CONSTANT;
             break;
         case 1:
             // TODO: check ground collision here
-            if (TileMapWhatIsAt((int)mPosX+DOT_WIDTH/2,(int)mPosY+DOT_HEIGHT+2)) mVelY -= 10;
-            if ((int)mPosY+DOT_HEIGHT+2 > LEVEL_HEIGHT) mVelY -= 10;
+            if (TileMapWhatIsAt((int)mPosX+DOT_WIDTH/2,(int)mPosY+DOT_HEIGHT+2)) mVelY -= 2.5;
+            if ((int)mPosY+DOT_HEIGHT+2 > LEVEL_HEIGHT) mVelY -= 2.5;
             break;
         case 2:
             mVelY = DOT_VEL;
