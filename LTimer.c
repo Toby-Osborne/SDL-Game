@@ -18,19 +18,19 @@ void LTimerAction(struct LTimer* timer, enum LTimerAction action)
 {
     switch (action)
     {
-        case START:
+        case TIMER_START:
             timer->mStarted = true;
             timer->mStartTicks = SDL_GetTicks();
             timer->mPaused = false;
             timer->mPausedTicks = 0;
             break;
-        case STOP:
+        case TIMER_STOP:
             timer->mStarted = false;
             timer->mPaused = false;
             timer->mStartTicks = 0;
             timer->mPausedTicks = 0;
             break;
-        case PAUSE:
+        case TIMER_PAUSE:
             if( timer->mStarted && !timer->mPaused )
             {
                 timer->mPaused = true;
@@ -38,7 +38,7 @@ void LTimerAction(struct LTimer* timer, enum LTimerAction action)
                 timer->mStartTicks = 0;
             }
             break;
-        case UNPAUSE:
+        case TIMER_UNPAUSE:
             if( timer->mStarted && timer->mPaused )
             {
                 timer->mPaused = false;

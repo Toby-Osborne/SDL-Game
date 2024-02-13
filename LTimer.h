@@ -18,10 +18,10 @@ struct LTimer {
 void LTimerInit(struct LTimer* timer);
 
 enum LTimerAction {
-    START,
-    STOP,
-    PAUSE,
-    UNPAUSE
+    TIMER_START,
+    TIMER_STOP,
+    TIMER_PAUSE,
+    TIMER_UNPAUSE
 };
 
 void LTimerAction(struct LTimer* timer, enum LTimerAction action);
