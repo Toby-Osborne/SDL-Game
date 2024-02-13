@@ -78,50 +78,6 @@ void PlayerHandleEvent(SDL_Event *e)
     }
 }
 
-bool checkCollision (SDL_Rect a, SDL_Rect b)
-{
-    //The sides of the rectangles
-    int leftA, leftB;
-    int rightA, rightB;
-    int topA, topB;
-    int bottomA, bottomB;
-
-    //Calculate the sides of rect A
-    leftA = a.x;
-    rightA = a.x + a.w;
-    topA = a.y;
-    bottomA = a.y + a.h;
-
-    //Calculate the sides of rect B
-    leftB = b.x;
-    rightB = b.x + b.w;
-    topB = b.y;
-    bottomB = b.y + b.h;
-
-    //If any of the sides from A are outside B
-    if( bottomA <= topB )
-    {
-        return false;
-    }
-
-    if( topA >= bottomB )
-    {
-        return false;
-    }
-
-    if( rightA <= leftB )
-    {
-        return false;
-    }
-
-    if( leftA >= rightB )
-    {
-        return false;
-    }
-
-    //If none of the sides from A are outside B
-    return true;
-}
 
 bool PlayerCheckXCollision()
 {
@@ -136,6 +92,7 @@ bool PlayerCheckXCollision()
     }
     return false;
 }
+
 
 bool PlayerCheckYCollision()
 {
@@ -152,7 +109,6 @@ bool PlayerCheckYCollision()
 }
 
 const float terminal_velocity = 5.f;
-
 int playerDistX = 0;
 
 void PlayerProcessMovement()
@@ -246,18 +202,21 @@ void PlayerProcessMovement()
 int animationCounter = 0;
 
 bool dabFlag = false;
-int dabTime = 5000;
+const int dabTime = 5000;
+const int animationThreshold = 24;
 
 void PlayerRender(int camX, int camY)
 {
     if (PlayerController[DOWN] && !PlayerController[LEFT] && !PlayerController[RIGHT]) {
-        animationCounter = 6;
+            animationCounter = 6;
     }
     else if (!TileMapWhatIsAt((int)mPosX,(int)mPosY + PLAYER_HEIGHT+2)) {    // If in the air
         animationCounter = 7;
+        dabFlag = false;
+        LTimerAction(&dabTimer, STOP);
     } else if ((mVelX > -0.1) && (mVelX < 0.1)) {
+        animationCounter = 4;
         if (!dabFlag) {
-            animationCounter = 4;
             LTimerAction(&dabTimer, START);
             dabFlag = true;
         } else {
@@ -268,10 +227,10 @@ void PlayerRender(int camX, int camY)
         }
     } else {
         dabFlag = false;
-        if (playerDistX > 16) {
+        if (playerDistX > animationThreshold) {
             playerDistX = 0;
             animationCounter = (animationCounter+1)%4;
-        } else if (playerDistX < -16) {
+        } else if (playerDistX < -animationThreshold) {
             playerDistX = 0;
             animationCounter = (animationCounter+1)%4;
         }
