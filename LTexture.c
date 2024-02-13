@@ -115,8 +115,13 @@ void LTextureRender(struct LTexture *texture, int x, int y, int w, int h,SDL_Rec
 {
     // Here we create an arbitrary quad and map the texture onto it
     SDL_Rect renderQuad = {x, y, w, h};
-
     SDL_RenderCopy(texture->mRenderer, texture->mTexture, clip, &renderQuad);
+}
+
+void LTextureRenderEx(struct LTexture *texture, int x, int y, int w, int h,SDL_Rect* clip, double angle, SDL_Point *center, SDL_RendererFlip flip)
+{
+    SDL_Rect renderQuad = {x, y, w, h};
+    SDL_RenderCopyEx(texture->mRenderer, texture->mTexture, clip, &renderQuad, angle, center, flip);
 }
 
 void LTextureSetBlendMode(struct LTexture *texture, SDL_BlendMode blending)

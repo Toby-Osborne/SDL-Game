@@ -32,7 +32,6 @@ TTF_Font* gFont = NULL;
 struct LTexture gTextureCharacter;
 struct LTexture gTextureBackground;
 struct LTexture gTextureTile;
-struct LTexture gTextureMap;
 
 bool init()
 {
@@ -97,7 +96,7 @@ bool loadMedia()
     }
 
     LTextureInit(&gTextureCharacter);
-    LTextureLoadFromFile(&gTextureCharacter, gRenderer, "resources/character.png");
+    LTextureLoadFromFile(&gTextureCharacter, gRenderer, "resources/FatRunTexture.png");
 
     LTextureInit(&gTextureBackground);
     LTextureLoadFromFile(&gTextureBackground, gRenderer, "resources/bg-tiled.png");

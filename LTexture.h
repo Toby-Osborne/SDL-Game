@@ -36,4 +36,6 @@ bool LTextureLoadFromRenderedText(struct LTexture *texture, SDL_Renderer* gRende
 
 void LTextureRender(struct LTexture *texture, int x, int y, int w, int h,SDL_Rect* clip);
 
+void LTextureRenderEx(struct LTexture *texture, int x, int y, int w, int h,SDL_Rect* clip, double angle, SDL_Point *center, SDL_RendererFlip flip);
+
 #endif //SDLGAME_LTEXTURE_H

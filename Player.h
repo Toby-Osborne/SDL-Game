@@ -10,11 +10,14 @@
 #include "LTexture.h"
 
 //The dimensions of the dot
-static const int DOT_WIDTH = 100;
-static const int DOT_HEIGHT = 100;
+#define PLAYER_HEIGHT 128
+#define PLAYER_WIDTH 64
+
+#define PLAYER_TEXTURE_HEIGHT 64
+#define PLAYER_TEXTURE_WIDTH 64
 
 //Maximum axis velocity of the dot
-static const float DOT_VEL = 1.5;
+static const float PLAYER_VELOCITY = 1.5f;
 
 void PlayerInit(SDL_Renderer *renderer, struct LTexture* texture);
 

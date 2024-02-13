@@ -25,7 +25,6 @@
 #define INDEX(x,y) (LEVEL_WIDTH_TILES * (y) + (x))
 
 struct Tile{
-    SDL_Rect mPos;
     int mType;
 };
 

@@ -14,7 +14,7 @@ float mPosXPlus, mPosYPlus;
 
 float mVelX, mVelY;
 
-const float VEL_DECAY_CONSTANT = 0.4f;
+const float VEL_DECAY_CONSTANT = 0.8f;
 
 SDL_Rect collision_box;
 
@@ -22,19 +22,22 @@ SDL_Renderer *pRenderer;
 
 struct LTimer playerTimer;
 
+struct LTimer dabTimer;
+
 struct LTexture *pTexture;
 
 void PlayerInit(SDL_Renderer *renderer, struct LTexture* texture)
 {
     LTimerInit(&playerTimer);
     LTimerAction(&playerTimer,START);
+    LTimerInit(&dabTimer);
 
     pRenderer = renderer;
     pTexture = texture;
     collision_box.x = (int)mPosX;
     collision_box.y = (int)mPosY;
-    collision_box.w = 100;
-    collision_box.h = 100;
+    collision_box.w = PLAYER_WIDTH;
+    collision_box.h = PLAYER_HEIGHT;
 }
 
 enum PlayerVControllerKeys {
@@ -126,10 +129,10 @@ bool PlayerCheckXCollision()
     if (mVelX < 0)
     {
         if (TileMapWhatIsAt((int)(mPosXPlus),(int)mPosY)) return true;
-        if (TileMapWhatIsAt((int)(mPosXPlus),(int)mPosY+DOT_HEIGHT)) return true;
+        if (TileMapWhatIsAt((int)(mPosXPlus), (int)mPosY + PLAYER_HEIGHT)) return true;
     } else {
-        if (TileMapWhatIsAt((int)(mPosXPlus)+DOT_WIDTH,(int)mPosY)) return true;
-        if (TileMapWhatIsAt((int)(mPosXPlus)+DOT_WIDTH,(int)mPosY+DOT_HEIGHT)) return true;
+        if (TileMapWhatIsAt((int)(mPosXPlus) + PLAYER_WIDTH, (int)mPosY)) return true;
+        if (TileMapWhatIsAt((int)(mPosXPlus) + PLAYER_WIDTH, (int)mPosY + PLAYER_HEIGHT)) return true;
     }
     return false;
 }
@@ -140,15 +143,17 @@ bool PlayerCheckYCollision()
     if (mVelY < 0)
     {
         if (TileMapWhatIsAt((int)mPosX,(int)mPosYPlus)) return true;
-        if (TileMapWhatIsAt((int)mPosX+DOT_WIDTH,(int)mPosYPlus)) return true;
+        if (TileMapWhatIsAt((int)mPosX + PLAYER_WIDTH, (int)mPosYPlus)) return true;
     } else {
-        if (TileMapWhatIsAt((int)mPosX,(int)mPosYPlus+DOT_HEIGHT)) return true;
-        if (TileMapWhatIsAt((int)mPosX+DOT_WIDTH,(int)mPosYPlus+DOT_HEIGHT)) return true;
+        if (TileMapWhatIsAt((int)mPosX, (int)mPosYPlus + PLAYER_HEIGHT)) return true;
+        if (TileMapWhatIsAt((int)mPosX + PLAYER_WIDTH, (int)mPosYPlus + PLAYER_HEIGHT)) return true;
     }
     return false;
 }
 
 const float terminal_velocity = 5.f;
+
+int playerDistX = 0;
 
 void PlayerProcessMovement()
 {
@@ -159,11 +164,11 @@ void PlayerProcessMovement()
             break;
         case 1:
             // TODO: check ground collision here
-            if (TileMapWhatIsAt((int)mPosX+DOT_WIDTH/2,(int)mPosY+DOT_HEIGHT+2)) mVelY -= 2.5;
-            if ((int)mPosY+DOT_HEIGHT+2 > LEVEL_HEIGHT) mVelY -= 2.5;
+            if (TileMapWhatIsAt((int)mPosX + PLAYER_WIDTH / 2, (int)mPosY + PLAYER_HEIGHT + 2)) mVelY -= 2.5;
+            if ((int)mPosY + PLAYER_HEIGHT + 2 > LEVEL_HEIGHT) mVelY -= 2.5;
             break;
         case 2:
-            mVelY = DOT_VEL;
+            mVelY = PLAYER_VELOCITY;
             break;
     }
     switch(PlayerController[LEFT]+(PlayerController[RIGHT]<<1))
@@ -172,10 +177,10 @@ void PlayerProcessMovement()
             mVelX *= VEL_DECAY_CONSTANT;
             break;
         case 1:
-            mVelX = -DOT_VEL;
+            mVelX = -PLAYER_VELOCITY;
             break;
         case 2:
-            mVelX = DOT_VEL;
+            mVelX = PLAYER_VELOCITY;
             break;
     }
 
@@ -190,10 +195,10 @@ void PlayerProcessMovement()
     if (mPosXPlus < 0) {
         mVelX = 0;
         mPosX = 0;
-    } else if ( (int)mPosXPlus + DOT_WIDTH > LEVEL_WIDTH )
+    } else if ((int)mPosXPlus + PLAYER_WIDTH > LEVEL_WIDTH )
     {
         mVelX = 0;
-        mPosX = LEVEL_WIDTH-DOT_WIDTH;
+        mPosX = LEVEL_WIDTH - PLAYER_WIDTH - 1;
     }
     else if(PlayerCheckXCollision())
     {
@@ -201,7 +206,7 @@ void PlayerProcessMovement()
         if (mVelX < 0) {
             mPosX = (float)(TILE_WIDTH*((int)mPosX/TILE_WIDTH));
         } else {
-            mPosX = (float)(TILE_WIDTH*(((int)mPosX+DOT_WIDTH)/TILE_WIDTH+1)-DOT_WIDTH-1);
+            mPosX = (float)(TILE_WIDTH*(((int)mPosX + PLAYER_WIDTH) / TILE_WIDTH + 1) - PLAYER_WIDTH - 1);
         }
         mVelX = 0;
     }
@@ -212,16 +217,16 @@ void PlayerProcessMovement()
     if(mPosYPlus < 0) {
         mVelY = 0;
         mPosY = 0;
-    } else if ((int)mPosYPlus + DOT_HEIGHT > LEVEL_HEIGHT) {
+    } else if ((int)mPosYPlus + PLAYER_HEIGHT > LEVEL_HEIGHT) {
         mVelY = 0;
-        mPosY = LEVEL_HEIGHT-DOT_HEIGHT;
+        mPosY = LEVEL_HEIGHT - PLAYER_HEIGHT - 1;
     } else if (PlayerCheckYCollision())
     {
         // Clip to nearest tile if not already
         if (mVelY < 0) {
             mPosY = (float)(TILE_HEIGHT*((int)mPosY/TILE_HEIGHT));
         } else {
-            mPosY = (float)(TILE_HEIGHT*((((int)mPosY+DOT_HEIGHT)/TILE_HEIGHT)+1)-DOT_HEIGHT-1);
+            mPosY = (float)(TILE_HEIGHT*((((int)mPosY + PLAYER_HEIGHT) / TILE_HEIGHT) + 1) - PLAYER_HEIGHT - 1);
         }
         mVelY = 0;
     }
@@ -229,16 +234,50 @@ void PlayerProcessMovement()
         mPosY = mPosYPlus;
     }
 
+    if (mVelX != 0) {
+        playerDistX += (int)(5.f*mVelX);
+    }
     collision_box.x = (int)mPosX;
     collision_box.y = (int)mPosY;
 
     LCameraProcessMovement();
 }
 
+int animationCounter = 0;
+
+bool dabFlag = false;
+int dabTime = 5000;
+
 void PlayerRender(int camX, int camY)
 {
-    //Show the dot
-    LTextureRender(pTexture, (int)mPosX-camX, (int)mPosY-camY, collision_box.w, collision_box.h,NULL);
+    if ((mVelX > -0.1) && (mVelX < 0.1)) {
+        if (!dabFlag) {
+            animationCounter = 4;
+            LTimerAction(&dabTimer, START);
+            dabFlag = true;
+        } else {
+            if (LTimerGetTicks(&dabTimer) > dabTime) {
+                animationCounter = 5;
+                LTimerAction(&dabTimer, STOP);
+            }
+        }
+    }else {
+        dabFlag = false;
+        if (playerDistX > 16) {
+            playerDistX = 0;
+            animationCounter = (animationCounter+1)%4;
+        } else if (playerDistX < -16) {
+            playerDistX = 0;
+            animationCounter = (animationCounter+1)%4;
+        }
+    }
+    int height_offset = 4;
+    SDL_Rect clip = {64*animationCounter,height_offset,PLAYER_TEXTURE_WIDTH,PLAYER_TEXTURE_HEIGHT};
+    if (mVelX > 0) {
+        LTextureRenderEx(pTexture, (int)mPosX-camX-(PLAYER_HEIGHT-PLAYER_WIDTH)/2, (int)mPosY-camY+height_offset, PLAYER_HEIGHT, PLAYER_HEIGHT, &clip, 0.0f, NULL, SDL_FLIP_NONE);
+    } else {
+        LTextureRenderEx(pTexture, (int)mPosX-camX-(PLAYER_HEIGHT-PLAYER_WIDTH)/2, (int)mPosY-camY+height_offset, PLAYER_HEIGHT, PLAYER_HEIGHT, &clip, 0.0f, NULL, SDL_FLIP_HORIZONTAL);
+    }
 }
 
 int PlayerGetX(){ return (int)mPosX; }

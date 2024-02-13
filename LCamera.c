@@ -11,12 +11,12 @@ SDL_Rect camera = {0,0,SCREEN_WIDTH,SCREEN_HEIGHT};
 
 void LCameraProcessMovement()
 {
-    camera.x = ( PlayerGetX() + DOT_WIDTH / 2 ) - SCREEN_WIDTH / 2;
-    camera.y = ( PlayerGetY() + DOT_HEIGHT / 2 ) - SCREEN_HEIGHT / 2;
+    camera.x = (PlayerGetX() + PLAYER_WIDTH / 2 ) - SCREEN_WIDTH / 2;
+    camera.y = (PlayerGetY() + PLAYER_HEIGHT / 2 ) - SCREEN_HEIGHT / 2;
 
     //Center the camera over the dot
-    camera.x = ( PlayerGetX() + DOT_WIDTH / 2 ) - SCREEN_WIDTH / 2;
-    camera.y = ( PlayerGetY() + DOT_HEIGHT / 2 ) - SCREEN_HEIGHT / 2;
+    camera.x = (PlayerGetX() + PLAYER_WIDTH / 2 ) - SCREEN_WIDTH / 2;
+    camera.y = (PlayerGetY() + PLAYER_HEIGHT / 2 ) - SCREEN_HEIGHT / 2;
 
     //Keep the camera in bounds
     if( camera.x < 0 )
