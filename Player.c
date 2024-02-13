@@ -250,7 +250,12 @@ int dabTime = 5000;
 
 void PlayerRender(int camX, int camY)
 {
-    if ((mVelX > -0.1) && (mVelX < 0.1)) {
+    if (PlayerController[DOWN] && !PlayerController[LEFT] && !PlayerController[RIGHT]) {
+        animationCounter = 6;
+    }
+    else if (!TileMapWhatIsAt((int)mPosX,(int)mPosY + PLAYER_HEIGHT+2)) {    // If in the air
+        animationCounter = 7;
+    } else if ((mVelX > -0.1) && (mVelX < 0.1)) {
         if (!dabFlag) {
             animationCounter = 4;
             LTimerAction(&dabTimer, START);
@@ -261,7 +266,7 @@ void PlayerRender(int camX, int camY)
                 LTimerAction(&dabTimer, STOP);
             }
         }
-    }else {
+    } else {
         dabFlag = false;
         if (playerDistX > 16) {
             playerDistX = 0;
@@ -271,8 +276,8 @@ void PlayerRender(int camX, int camY)
             animationCounter = (animationCounter+1)%4;
         }
     }
-    int height_offset = 4;
-    SDL_Rect clip = {64*animationCounter,height_offset,PLAYER_TEXTURE_WIDTH,PLAYER_TEXTURE_HEIGHT};
+    int height_offset = 8;
+    SDL_Rect clip = {64*animationCounter,0,PLAYER_TEXTURE_WIDTH,PLAYER_TEXTURE_HEIGHT};
     if (mVelX > 0) {
         LTextureRenderEx(pTexture, (int)mPosX-camX-(PLAYER_HEIGHT-PLAYER_WIDTH)/2, (int)mPosY-camY+height_offset, PLAYER_HEIGHT, PLAYER_HEIGHT, &clip, 0.0f, NULL, SDL_FLIP_NONE);
     } else {
