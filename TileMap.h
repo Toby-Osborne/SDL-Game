@@ -28,9 +28,11 @@ struct Tile{
     int mType;
 };
 
-void TileMapInit(struct LTexture* texture, SDL_Renderer* renderer);
+void TileMapInit(struct LTexture *texture);
 
 uint8_t TileMapWhatIsAt(int x, int y);
+
+void TileMapSetTile(int x, int y, int val);
 
 void TileMapRenderTiles(SDL_Rect *camera);
 

@@ -106,7 +106,7 @@ bool loadMedia()
 
     LTextureSetBlendMode(&gTextureCharacter, SDL_BLENDMODE_BLEND);
 
-    TileMapInit(&gTextureTile,gRenderer);
+    TileMapInit(&gTextureTile);
 
     return success;
 }

@@ -4,21 +4,24 @@
 
 #include "TileMap.h"
 
-SDL_Renderer* tRenderer;
 struct LTexture * textureMap;
 
 SDL_Rect tileClip = {0, 0, TILE_TEXTURE_WIDTH, TILE_TEXTURE_HEIGHT};
 
 uint8_t map[LEVEL_WIDTH_TILES*LEVEL_HEIGHT_TILES] = {0};
 
-void TileMapInit(struct LTexture* texture, SDL_Renderer* renderer)
+void TileMapInit(struct LTexture *texture)
 {
-    tRenderer = renderer;
     textureMap = texture;
 
     for (int x_tile = 0; x_tile < LEVEL_WIDTH_TILES; x_tile ++) {
         map[INDEX(x_tile,5)] = 1;
     }
+}
+
+void TileMapSetTile(int x, int y, int val)
+{
+    map[INDEX(x / TILE_WIDTH, y / TILE_HEIGHT)] = val;
 }
 
 uint8_t TileMapWhatIsAt(int x, int y)

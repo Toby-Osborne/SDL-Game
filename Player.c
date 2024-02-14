@@ -18,7 +18,7 @@ const float VEL_DECAY_CONSTANT = 0.8f;
 
 SDL_Rect collision_box;
 
-SDL_Renderer *pRenderer;
+SDL_Rect *pCamera;
 
 struct LTimer playerTimer;
 
@@ -32,7 +32,7 @@ void PlayerInit(SDL_Renderer *renderer, struct LTexture* texture)
     LTimerAction(&playerTimer, TIMER_START);
     LTimerInit(&dabTimer);
 
-    pRenderer = renderer;
+    pCamera = LCameraGetCamera();
     pTexture = texture;
     collision_box.x = (int)mPosX;
     collision_box.y = (int)mPosY;
@@ -58,10 +58,10 @@ void PlayerHandleEvent(SDL_Event *e)
         //Adjust the velocity
         switch( e->key.keysym.sym )
         {
-            case SDLK_UP: PlayerController[UP] = true; break;
-            case SDLK_DOWN: PlayerController[DOWN] = true; break;
-            case SDLK_LEFT: PlayerController[LEFT] = true; break;
-            case SDLK_RIGHT: PlayerController[RIGHT] = true; break;
+            case SDLK_w: PlayerController[UP] = true; break;
+            case SDLK_s: PlayerController[DOWN] = true; break;
+            case SDLK_a: PlayerController[LEFT] = true; break;
+            case SDLK_d: PlayerController[RIGHT] = true; break;
         }
     }
         //If a key was released
@@ -70,11 +70,17 @@ void PlayerHandleEvent(SDL_Event *e)
         //Adjust the velocity
         switch( e->key.keysym.sym )
         {
-            case SDLK_UP: PlayerController[UP] = false; break;
-            case SDLK_DOWN: PlayerController[DOWN] = false; break;
-            case SDLK_LEFT: PlayerController[LEFT] = false; break;
-            case SDLK_RIGHT: PlayerController[RIGHT] = false; break;
+            case SDLK_w: PlayerController[UP] = false; break;
+            case SDLK_s: PlayerController[DOWN] = false; break;
+            case SDLK_a: PlayerController[LEFT] = false; break;
+            case SDLK_d: PlayerController[RIGHT] = false; break;
         }
+    }
+    else if(e->type == SDL_MOUSEBUTTONDOWN)
+    {
+        int x,y;
+        SDL_GetMouseState( &x, &y );
+        TileMapSetTile(x+pCamera->x,y+pCamera->y,TileMapWhatIsAt(x+pCamera->x, y+pCamera->y) == 0 ? 1 : 0);
     }
 }
 
@@ -216,7 +222,6 @@ enum PlayerSprites {
 enum PlayerAnimationState {
     PRUN,
     PSTOP,
-    PSTILL,
     PDAB,
     PCROUCH,
     PJUMP,
@@ -261,12 +266,12 @@ void PlayerRender(int camX, int camY)
             LTimerAction(&dabTimer,TIMER_STOP); // If we didn't break above, then we left STOP state
             break;
         case PRUN:
-            if (PlayerController[UP]) {
-                PlayerState = PJUMP;
-            }
-            else if (!(PlayerController[LEFT]||PlayerController[RIGHT])&&PlayerController[DOWN])
+            if (!PlayerController[LEFT]&&!PlayerController[RIGHT]&&PlayerController[DOWN])
             {
                 PlayerState = PCROUCH;
+            }
+            else if (PlayerController[UP]) {
+                PlayerState = PJUMP;
             }
             else if (!inputPos)
             {
@@ -299,7 +304,7 @@ void PlayerRender(int camX, int camY)
             break;
         case PJUMP:
             // We only exit jump if something below
-            if (TileMapWhatIsAt((int)mPosX,(int)mPosY+PLAYER_HEIGHT+1)) {
+            if (TileMapWhatIsAt((int)mPosX,(int)mPosY+PLAYER_HEIGHT+2)) {
                 PlayerState = PRUN;
             }
             AnimationFrame = KJUMP;
@@ -307,7 +312,7 @@ void PlayerRender(int camX, int camY)
 
         case PDAB:
             if (inputPos) {
-                PlayerState = PSTILL;
+                PlayerState = PSTOP;
             }
             AnimationFrame = KDAB;
             break;
