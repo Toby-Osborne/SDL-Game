@@ -31,4 +31,8 @@ int PlayerGetX();
 
 int PlayerGetY();
 
+void PlayerPause();
+
+void PlayerUnpause();
+
 #endif //SDLGAME_PLAYER_H

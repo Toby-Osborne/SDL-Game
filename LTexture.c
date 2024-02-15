@@ -4,7 +4,7 @@
 
 #include "LTexture.h"
 
-#define MAX_TEXTURES 5
+#define MAX_TEXTURES 100
 
 void LTextureInit(struct LTexture *texture)
 {

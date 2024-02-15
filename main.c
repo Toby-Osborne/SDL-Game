@@ -10,6 +10,7 @@
 #include "Player.h"
 #include "LCamera.h"
 #include "TileMap.h"
+#include "LButton.h"
 
 
 //Starts up SDL and creates window
@@ -32,6 +33,10 @@ TTF_Font* gFont = NULL;
 struct LTexture gTextureCharacter;
 struct LTexture gTextureBackground;
 struct LTexture gTextureTile;
+
+struct mainMenu {
+    struct LButton StartButton;
+} mainMenu;
 
 bool init()
 {
@@ -83,6 +88,14 @@ bool init()
     return success;
 }
 
+bool start_game = false;
+
+void StartGameCallback()
+{
+    start_game = true;
+    PlayerUnpause();
+}
+
 bool loadMedia()
 {
     //Loading success flag
@@ -107,6 +120,9 @@ bool loadMedia()
     LTextureSetBlendMode(&gTextureCharacter, SDL_BLENDMODE_BLEND);
 
     TileMapInit(&gTextureTile);
+
+    SDL_Rect button_location = {(SCREEN_WIDTH-400)/2,(SCREEN_HEIGHT-80)/2,400,80};
+    LButtonInitButton(&(mainMenu.StartButton), gRenderer, button_location, "Begin the Game", gFont, &StartGameCallback);
 
     return success;
 }
@@ -151,25 +167,35 @@ int main( int argc, char* args[] )
             PlayerInit(gRenderer, &gTextureCharacter);
 
             while (!quit) {
+
+                // Handle Inputs
                 while (SDL_PollEvent(&e) != 0) {
                     if (e.type == SDL_QUIT) {
                         quit = true;
                     }
-                    PlayerHandleEvent(&e);
+                    if (start_game) {
+                        PlayerHandleEvent(&e);
+                    } else {
+                        LButtonProcessButtons(&e,(struct LButton*)(&mainMenu),1);
+                    }
                 }
 
-                PlayerProcessMovement();
-
-                SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
+                // Render Scene
+                SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0xFF);
                 SDL_RenderClear(gRenderer);
 
-                // Draw Background
-                SDL_Rect background_render = {camera->x%512, camera->y%512, camera->w, camera->h};
-                LTextureRender(&gTextureBackground,0,0,background_render.w, background_render.h, &background_render);
+                if (start_game) {
+                    PlayerProcessMovement();
+                    SDL_Rect background_render = {camera->x%512, camera->y%512, camera->w, camera->h};
+                    LTextureRender(&gTextureBackground,0,0,background_render.w, background_render.h, &background_render);
 
-                TileMapRenderTiles(camera);
+                    TileMapRenderTiles(camera);
 
-                PlayerRender(camera->x, camera->y);
+                    PlayerRender(camera->x, camera->y);
+                } else {
+                    LButtonRenderButtons((struct LButton*)(&mainMenu),1);
+                }
+
                 SDL_RenderPresent(gRenderer);
             }
         }

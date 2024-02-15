@@ -26,6 +26,15 @@ struct LTimer dabTimer;
 
 struct LTexture *pTexture;
 
+bool paused = true;
+
+void PlayerPause() {paused = true;}
+
+void PlayerUnpause() {
+    paused = false;
+    LTimerStopwatch(&playerTimer);
+}
+
 void PlayerInit(SDL_Renderer *renderer, struct LTexture* texture)
 {
     LTimerInit(&playerTimer);

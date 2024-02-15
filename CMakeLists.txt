@@ -15,6 +15,8 @@ add_executable(SDL2Test main.c main.h
         LCamera.h
         TileMap.c
         TileMap.h
+        LButton.c
+        LButton.h
 )
 
 INCLUDE(FindPkgConfig)
