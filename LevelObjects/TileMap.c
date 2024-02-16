@@ -13,10 +13,38 @@ uint8_t map[LEVEL_WIDTH_TILES*LEVEL_HEIGHT_TILES] = {0};
 void TileMapInit(struct LTexture *texture)
 {
     textureMap = texture;
+}
 
-    for (int x_tile = 0; x_tile < LEVEL_WIDTH_TILES; x_tile ++) {
-        map[INDEX(x_tile,5)] = 1;
+void TileMapLoadTileMap(char* path)
+{
+    SDL_RWops* file = SDL_RWFromFile( path, "r+b" );
+
+    if (file==NULL)
+    {
+        printf("%s does not exist, cannot load tilemap", path);
+        return;
     }
+    for (int i = 0;i<LEVEL_WIDTH_TILES*LEVEL_HEIGHT_TILES;i++)
+    {
+        SDL_RWread( file, &map[i], sizeof(uint8_t), 1);
+    }
+    SDL_RWclose(file);
+}
+
+void TileMapSaveTileMap(char* path)
+{
+    SDL_RWops* file = SDL_RWFromFile( path, "w+b" );
+
+    if(file==NULL)
+    {
+        printf("%s does not exist, creating tilemap", path);
+    }
+    for (int i = 0;i<LEVEL_WIDTH_TILES*LEVEL_HEIGHT_TILES;i++)
+    {
+        SDL_RWwrite(file, &map[i], sizeof(uint8_t), 1);
+    }
+
+    SDL_RWclose(file);
 }
 
 void TileMapSetTile(int x, int y, int val)

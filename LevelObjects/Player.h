@@ -7,7 +7,7 @@
 
 #include <SDL.h>
 
-#include "LTexture.h"
+#include "../LTexture.h"
 
 //The dimensions of the dot
 #define PLAYER_HEIGHT 128

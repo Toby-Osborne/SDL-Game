@@ -7,16 +7,14 @@
 SDL_Renderer* buttonRenderer = NULL;
 
 
-void LButtonInitButton(struct LButton* button, SDL_Renderer *renderer, SDL_Rect button_location, char* button_text, TTF_Font* font, void (*cb_func)())
+void LButtonInitButton(struct LButton* button, SDL_Renderer *renderer, SDL_Rect button_location, char* button_text, FC_Font* font, void (*cb_func)())
 {
     if (buttonRenderer == NULL) buttonRenderer = renderer;
     button->buttonLocation = button_location;
     button->buttonState = BUTTON_UNHOVERED;
     button->CBFunc = cb_func;
     button->buttonText = button_text;
-    LTextureInit(&button->text);
-    SDL_Color text_color = {0,0,0,0xFF};
-    LTextureLoadFromRenderedText(&button->text, buttonRenderer, button_text, font, text_color);
+    button->buttonFont = font;
 }
 
 int x, y;
@@ -62,7 +60,8 @@ void LButtonRenderButton(struct LButton* button)
     }
 
     SDL_RenderFillRect(buttonRenderer, &button->buttonLocation);
-    LTextureRender(&button->text,button->buttonLocation.x+(button->buttonLocation.w-button->text.mWidth)/2,button->buttonLocation.y+(button->buttonLocation.h-button->text.mHeight)/2,button->text.mWidth,button->text.mHeight,NULL);
+//    LTextureRender(&button->text,button->buttonLocation.x+(button->buttonLocation.w-button->text.mWidth)/2,button->buttonLocation.y+(button->buttonLocation.h-button->text.mHeight)/2,button->text.mWidth,button->text.mHeight,NULL);
+    FC_DrawAlign(button->buttonFont, buttonRenderer, button->buttonLocation.x+(button->buttonLocation.w)/2,button->buttonLocation.y+(button->buttonLocation.h)/2, FC_ALIGN_CENTER,button->buttonText, NULL);
 }
 
 void LButtonRenderButtons(struct LButton* buttons, int numButtons)

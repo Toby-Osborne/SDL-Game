@@ -5,7 +5,7 @@
 #include "LCamera.h"
 #include "Player.h"
 #include "TileMap.h"
-#include "main.h"
+#include "../main.h"
 
 SDL_Rect camera = {0,0,SCREEN_WIDTH,SCREEN_HEIGHT};
 

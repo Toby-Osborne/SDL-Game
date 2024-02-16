@@ -3,14 +3,15 @@
 #include <SDL_image.h>
 #include <stdio.h>
 #include <string.h>
+#include <SDL_FontCache.h>
 
 #include "main.h"
 #include "LTexture.h"
 #include "LTimer.h"
-#include "Player.h"
-#include "LCamera.h"
-#include "TileMap.h"
-#include "LButton.h"
+#include "LevelObjects/Player.h"
+#include "LevelObjects/LCamera.h"
+#include "LevelObjects/TileMap.h"
+#include "MenuObjects/LButton.h"
 
 
 //Starts up SDL and creates window
@@ -27,8 +28,7 @@ SDL_Renderer* gRenderer = NULL;
 
 // Renderer for tiles onto a texture
 
-
-TTF_Font* gFont = NULL;
+FC_Font* gFCFont;
 
 struct LTexture gTextureCharacter;
 struct LTexture gTextureBackground;
@@ -75,6 +75,8 @@ bool init()
         }
         else
         {
+            gFCFont = FC_CreateFont();
+
             SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
             //Initialize PNG loading
             int imgFlags = IMG_INIT_PNG;
@@ -101,28 +103,25 @@ bool loadMedia()
     //Loading success flag
     bool success = true;
 
-    gFont = TTF_OpenFont("resources/lazy.ttf", 28);
-    if (gFont == NULL)
-    {
-        printf( "Failed to load lazy font! SDL_ttf Error: %s\n", TTF_GetError() );
-        success = false;
-    }
+    FC_LoadFont(gFCFont, gRenderer, "GameResources/Fonts/lazy.ttf", 25, FC_MakeColor(0,0,0,255), TTF_STYLE_NORMAL);
 
     LTextureInit(&gTextureCharacter);
-    LTextureLoadFromFile(&gTextureCharacter, gRenderer, "resources/FatRunTexture.png");
+    LTextureLoadFromFile(&gTextureCharacter, gRenderer, "GameResources/FatRunTexture.png");
 
     LTextureInit(&gTextureBackground);
-    LTextureLoadFromFile(&gTextureBackground, gRenderer, "resources/bg-tiled.png");
+    LTextureLoadFromFile(&gTextureBackground, gRenderer, "GameResources/bg-tiled.png");
 
     LTextureInit(&gTextureTile);
-    LTextureLoadFromFile(&gTextureTile, gRenderer, "resources/dirt-tile-1.png");
+    LTextureLoadFromFile(&gTextureTile, gRenderer, "GameResources/dirt-tile-1.png");
 
     LTextureSetBlendMode(&gTextureCharacter, SDL_BLENDMODE_BLEND);
 
     TileMapInit(&gTextureTile);
 
     SDL_Rect button_location = {(SCREEN_WIDTH-400)/2,(SCREEN_HEIGHT-80)/2,400,80};
-    LButtonInitButton(&(mainMenu.StartButton), gRenderer, button_location, "Begin the Game", gFont, &StartGameCallback);
+    LButtonInitButton(&(mainMenu.StartButton), gRenderer, button_location, "Begin the Game", gFCFont, &StartGameCallback);
+
+    TileMapLoadTileMap("Levels/level-1.tm");
 
     return success;
 }
@@ -131,9 +130,11 @@ void closeGame() {
 
     FreeTextures();
 
-    //Free global font
-    TTF_CloseFont( gFont );
-    gFont = NULL;
+    //Save Tilemap
+    TileMapSaveTileMap("Levels/level-1.tm");
+
+    //Free global gFCFont
+    FC_FreeFont(gFCFont);
 
     //Destroy window
     SDL_DestroyRenderer( gRenderer );

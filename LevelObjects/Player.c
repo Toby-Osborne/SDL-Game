@@ -3,9 +3,9 @@
 //
 
 #include "Player.h"
-#include "main.h"
+#include "../main.h"
 #include "physics.h"
-#include "LTimer.h"
+#include "../LTimer.h"
 #include "LCamera.h"
 #include "TileMap.h"
 float mPosX, mPosY;

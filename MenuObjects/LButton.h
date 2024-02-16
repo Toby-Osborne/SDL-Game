@@ -5,10 +5,11 @@
 #ifndef SDLGAME_LBUTTON_H
 #define SDLGAME_LBUTTON_H
 
-#include "LTexture.h"
+#include "../LTexture.h"
 #include <stdbool.h>
 #include <SDL.h>
 #include <SDL_ttf.h>
+#include <SDL_FontCache.h>
 
 enum LButtonState {
     BUTTON_HOVERED,
@@ -20,11 +21,11 @@ struct LButton {
     void (*CBFunc)();
     SDL_Rect buttonLocation;
     char* buttonText;
+    FC_Font* buttonFont;
     enum LButtonState buttonState;
-    struct LTexture text;
 };
 
-void LButtonInitButton(struct LButton* button, SDL_Renderer *renderer, SDL_Rect button_location, char* button_text, TTF_Font* font, void (*cb_func)());
+void LButtonInitButton(struct LButton* button, SDL_Renderer *renderer, SDL_Rect button_location, char* button_text, FC_Font* font, void (*cb_func)());
 
 bool LButtonProcessButton(struct LButton* button, SDL_Event *e);
 

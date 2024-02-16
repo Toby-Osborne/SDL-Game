@@ -5,7 +5,7 @@
 #ifndef SDLGAME_TILEMAP_H
 #define SDLGAME_TILEMAP_H
 
-#include "LTexture.h"
+#include "../LTexture.h"
 #include "LCamera.h"
 #include <SDL.h>
 
@@ -35,5 +35,9 @@ uint8_t TileMapWhatIsAt(int x, int y);
 void TileMapSetTile(int x, int y, int val);
 
 void TileMapRenderTiles(SDL_Rect *camera);
+
+void TileMapLoadTileMap(char* path);
+
+void TileMapSaveTileMap(char* path);
 
 #endif //SDLGAME_TILEMAP_H
