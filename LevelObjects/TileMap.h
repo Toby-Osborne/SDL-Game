@@ -13,9 +13,6 @@
 #define TILE_WIDTH 64
 #define TILE_HEIGHT 64
 
-#define TILE_TEXTURE_WIDTH 512
-#define TILE_TEXTURE_HEIGHT 512
-
 #define LEVEL_WIDTH_TILES 128
 #define LEVEL_HEIGHT_TILES 64
 
@@ -24,11 +21,7 @@
 
 #define INDEX(x,y) (LEVEL_WIDTH_TILES * (y) + (x))
 
-struct Tile{
-    int mType;
-};
-
-void TileMapInit(struct LTexture *texture);
+void TileMapInit();
 
 uint8_t TileMapWhatIsAt(int x, int y);
 

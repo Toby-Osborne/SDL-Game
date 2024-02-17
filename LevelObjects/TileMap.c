@@ -4,16 +4,24 @@
 
 #include "TileMap.h"
 
-struct LTexture * textureMap;
+#define TILE_TEXTURE_WIDTH 16
+#define TILE_TEXTURE_HEIGHT 16
+
+#define TILE_TEXTURE_MAP_WIDTH_TILES 32
+#define TILE_TEXTURE_MAP_HEIGHT_TILES 32
+
 extern SDL_Rect camera;
 
 SDL_Rect tileClip = {0, 0, TILE_TEXTURE_WIDTH, TILE_TEXTURE_HEIGHT};
 
-uint8_t map[LEVEL_WIDTH_TILES*LEVEL_HEIGHT_TILES] = {0};
+uint32_t map[LEVEL_WIDTH_TILES*LEVEL_HEIGHT_TILES] = {0};
 
-void TileMapInit(struct LTexture *texture)
+struct LTexture gTextureTile;
+
+void TileMapInit()
 {
-    textureMap = texture;
+    LTextureInit(&gTextureTile);
+    LTextureLoadFromFile(&gTextureTile, "GameResources/Textures-16.png");
 }
 
 void TileMapLoadTileMap(char* path)
@@ -84,7 +92,9 @@ void TileMapRenderTiles()
     for (int x_tile = camera.x/TILE_WIDTH;x_tile < fastTileClamp((camera.x+camera.w)/TILE_WIDTH+1,LEVEL_WIDTH_TILES);x_tile++) {
         for (int y_tile = camera.y/TILE_WIDTH;y_tile < fastTileClamp((camera.y+camera.h)/TILE_WIDTH+1,LEVEL_HEIGHT_TILES );y_tile++) {
             if (!map[INDEX(x_tile,y_tile)]) continue;
-            LTextureRender(textureMap,x_tile*TILE_WIDTH-camera.x,y_tile*TILE_HEIGHT-camera.y,TILE_WIDTH,TILE_HEIGHT,&tileClip);
+            tileClip.x = TILE_TEXTURE_WIDTH * (map[INDEX(x_tile,y_tile)]%TILE_TEXTURE_MAP_WIDTH_TILES);
+            tileClip.y = TILE_TEXTURE_WIDTH * (map[INDEX(x_tile,y_tile)]/TILE_TEXTURE_MAP_WIDTH_TILES);
+            LTextureRender(&gTextureTile,x_tile*TILE_WIDTH-camera.x,y_tile*TILE_HEIGHT-camera.y,TILE_WIDTH,TILE_HEIGHT,&tileClip);
         }
     }
 }

@@ -86,6 +86,8 @@ bool PlayerController[NUM_CONTROLS] = {0};
 
 int dragStartX,dragStartY;
 
+int currentPlacingTile = 1;
+
 void EditorMapInteract(SDL_Event *e)
 {
     int x, y = {0};
@@ -95,7 +97,7 @@ void EditorMapInteract(SDL_Event *e)
         case SDL_MOUSEBUTTONDOWN: {
             SDL_GetMouseState(&x, &y);
             TileMapSetTile(x + camera.x, y + camera.y,
-                           e->button.button == SDL_BUTTON_LEFT ? 1 : 0);
+                           e->button.button == SDL_BUTTON_LEFT ? currentPlacingTile : 0);
             if (PlayerController[PLAYER_SHIFT]) {
                 dragStartX = x + camera.x;
                 dragStartY = y + camera.y;
@@ -105,8 +107,19 @@ void EditorMapInteract(SDL_Event *e)
         case SDL_MOUSEBUTTONUP:
             if (PlayerController[PLAYER_SHIFT]) {
                 SDL_GetMouseState(&x, &y);
-                TileMapFillTiles(x + camera.x,y + camera.y,dragStartX,dragStartY,e->button.button == SDL_BUTTON_LEFT ? 1 : 0);
+                TileMapFillTiles(x + camera.x,y + camera.y,dragStartX,dragStartY,e->button.button == SDL_BUTTON_LEFT ? currentPlacingTile : 0);
             }
+            break;
+        case SDL_KEYDOWN:
+            switch(e->key.keysym.sym)
+            {
+                case SDLK_e:
+                    currentPlacingTile = (currentPlacingTile + 1)%256;
+                    break;
+                case SDLK_q:
+                    currentPlacingTile = (currentPlacingTile - 1)%256;
+            }
+            break;
     }
 
 }
@@ -132,6 +145,9 @@ enum GameStates PlayerHandleInput(SDL_Event *e)
                 case SDLK_ESCAPE: PlayerPause(); LMenuSetPauseMenu() ;return GS_PAUSED;
                 case SDLK_LSHIFT: PlayerController[PLAYER_SHIFT] = true; break;
                 case SDLK_LCTRL: PlayerController[PLAYER_CTRL] = true; break;
+
+                // Edit Specific
+
             }
             break;
         case SDL_KEYUP:

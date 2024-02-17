@@ -8,7 +8,6 @@
 #include "string.h"
 
 struct LTexture gTextureBackground;
-struct LTexture gTextureTile;
 
 // Nobody tell them
 extern SDL_Renderer* gRenderer;
@@ -18,14 +17,10 @@ char currentLevelPath[200];
 
 void LevelInitLevels()
 {
-    TileMapInit(&gTextureTile);
+    TileMapInit();
 
     LTextureInit(&gTextureBackground);
     LTextureLoadFromFile(&gTextureBackground, "GameResources/bg-tiled.png");
-
-    LTextureInit(&gTextureTile);
-    LTextureLoadFromFile(&gTextureTile, "GameResources/dirt-tile-1.png");
-
 }
 
 void LevelLoadLevel(char * path)
