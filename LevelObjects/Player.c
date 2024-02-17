@@ -28,11 +28,14 @@ struct LTexture *pTexture;
 
 bool paused = true;
 
-void PlayerPause() {paused = true;}
+void PlayerPause() {
+    paused = true;
+    LTimerAction(&playerTimer, TIMER_PAUSE);
+}
 
 void PlayerUnpause() {
     paused = false;
-    LTimerStopwatch(&playerTimer);
+    LTimerAction(&playerTimer, TIMER_UNPAUSE);
 }
 
 void PlayerInit(SDL_Renderer *renderer, struct LTexture* texture)
@@ -47,6 +50,8 @@ void PlayerInit(SDL_Renderer *renderer, struct LTexture* texture)
     collision_box.y = (int)mPosY;
     collision_box.w = PLAYER_WIDTH;
     collision_box.h = PLAYER_HEIGHT;
+
+    PlayerPause();
 }
 
 enum PlayerVControllerKeys {
@@ -64,6 +69,11 @@ void PlayerHandleEvent(SDL_Event *e)
     //If a key was pressed
     if( e->type == SDL_KEYDOWN && e->key.repeat == 0 )
     {
+        if (e->key.keysym.sym == SDLK_SPACE)
+        {
+            PlayerUnpause();
+        }
+        if (paused) return;
         //Adjust the velocity
         switch( e->key.keysym.sym )
         {
@@ -71,6 +81,7 @@ void PlayerHandleEvent(SDL_Event *e)
             case SDLK_s: PlayerController[DOWN] = true; break;
             case SDLK_a: PlayerController[LEFT] = true; break;
             case SDLK_d: PlayerController[RIGHT] = true; break;
+            case SDLK_ESCAPE: PlayerPause(); break;
         }
     }
         //If a key was released
@@ -128,15 +139,15 @@ int playerDistX = 0;
 
 void PlayerProcessMovement()
 {
-
+    if (paused) return;
     switch(PlayerController[UP]+(PlayerController[DOWN]<<1))
     {
         case 0:
             break;
         case 1:
             // TODO: check ground collision here
-            if (TileMapWhatIsAt((int)mPosX + PLAYER_WIDTH / 2, (int)mPosY + PLAYER_HEIGHT + 2)) mVelY -= 2.5;
-            if ((int)mPosY + PLAYER_HEIGHT + 2 > LEVEL_HEIGHT) mVelY -= 2.5;
+            if (TileMapWhatIsAt((int)mPosX + PLAYER_WIDTH / 2, (int)mPosY + PLAYER_HEIGHT + 1)) mVelY -= 2.5;
+            if ((int)mPosY + PLAYER_HEIGHT + 1 > LEVEL_HEIGHT) mVelY -= 2.5;
             break;
         case 2:
             mVelY = PLAYER_VELOCITY;

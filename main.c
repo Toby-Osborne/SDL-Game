@@ -123,6 +123,8 @@ bool loadMedia()
 
     TileMapLoadTileMap("Levels/level-1.tm");
 
+    PlayerInit(gRenderer, &gTextureCharacter);
+
     return success;
 }
 
@@ -148,6 +150,8 @@ void closeGame() {
     SDL_Quit();
 }
 
+
+
 int main( int argc, char* args[] )
 {
     if (!init()) {
@@ -165,10 +169,7 @@ int main( int argc, char* args[] )
             SDL_Event e;
 
             SDL_Rect *camera = LCameraGetCamera();
-            PlayerInit(gRenderer, &gTextureCharacter);
-
             while (!quit) {
-
                 // Handle Inputs
                 while (SDL_PollEvent(&e) != 0) {
                     if (e.type == SDL_QUIT) {
