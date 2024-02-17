@@ -51,6 +51,7 @@ enum GameStates LMenuHandleInput(SDL_Event *e)
                 return GS_LEVEL;
             }
             if (LButtonProcessButton(&MainMenu.editLevelButton, e)) {
+                LevelLoadLevel("Levels/level-1.tm");
                 PlayerSetGameMode(GS_LEVEL_EDIT);
                 PlayerRespawn();
                 return GS_LEVEL_EDIT;
@@ -95,7 +96,7 @@ void LMenuInitMenu()
     LButtonInitButton(&MainMenu.startButton, startButtonLocation, "Begin the Game", gFCFont);
 
     SDL_Rect levelEditButtonLocation = {(SCREEN_WIDTH-400)/2,(SCREEN_HEIGHT-80)/2+50,400,80};
-    LButtonInitButton(&MainMenu.editLevelButton, levelEditButtonLocation, "Level Edit Button", gFCFont);
+    LButtonInitButton(&MainMenu.editLevelButton, levelEditButtonLocation, "Edit the Level", gFCFont);
 
     SDL_Rect quitButtonLocation = {(SCREEN_WIDTH-400)/2,(SCREEN_HEIGHT-80)/2+150,400,80};
     LButtonInitButton(&MainMenu.quitButton, quitButtonLocation, "Quit the Game", gFCFont);

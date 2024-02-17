@@ -77,43 +77,80 @@ enum PlayerVControllerKeys {
     PLAYER_DOWN,
     PLAYER_LEFT,
     PLAYER_RIGHT,
+    PLAYER_SHIFT,
+    PLAYER_CTRL,
     NUM_CONTROLS,
 };
 
 bool PlayerController[NUM_CONTROLS] = {0};
 
+int dragStartX,dragStartY;
+
+void EditorMapInteract(SDL_Event *e)
+{
+    int x, y = {0};
+
+    switch(e->type)
+    {
+        case SDL_MOUSEBUTTONDOWN: {
+            SDL_GetMouseState(&x, &y);
+            TileMapSetTile(x + camera.x, y + camera.y,
+                           e->button.button == SDL_BUTTON_LEFT ? 1 : 0);
+            if (PlayerController[PLAYER_SHIFT]) {
+                dragStartX = x + camera.x;
+                dragStartY = y + camera.y;
+            }
+            break;
+        }
+        case SDL_MOUSEBUTTONUP:
+            if (PlayerController[PLAYER_SHIFT]) {
+                SDL_GetMouseState(&x, &y);
+                TileMapFillTiles(x + camera.x,y + camera.y,dragStartX,dragStartY,e->button.button == SDL_BUTTON_LEFT ? 1 : 0);
+            }
+    }
+
+}
+
+void PlayerMapInteract(SDL_Event *e)
+{
+    // HAHA ADVENTURE MODE
+}
+
 enum GameStates PlayerHandleInput(SDL_Event *e)
 {
+    if (e->key.repeat) return gameMode;
     //If a key was pressed
-    if( e->type == SDL_KEYDOWN && e->key.repeat == 0 )
+    switch (e->type)
     {
-        //Adjust the velocity
-        switch( e->key.keysym.sym )
-        {
-            case SDLK_w: PlayerController[PLAYER_UP] = true; break;
-            case SDLK_s: PlayerController[PLAYER_DOWN] = true; break;
-            case SDLK_a: PlayerController[PLAYER_LEFT] = true; break;
-            case SDLK_d: PlayerController[PLAYER_RIGHT] = true; break;
-            case SDLK_ESCAPE: PlayerPause(); LMenuSetPauseMenu() ;return GS_PAUSED;
-        }
+        case SDL_KEYDOWN:
+            switch( e->key.keysym.sym )
+            {
+                case SDLK_w: PlayerController[PLAYER_UP] = true; break;
+                case SDLK_s: PlayerController[PLAYER_DOWN] = true; break;
+                case SDLK_a: PlayerController[PLAYER_LEFT] = true; break;
+                case SDLK_d: PlayerController[PLAYER_RIGHT] = true; break;
+                case SDLK_ESCAPE: PlayerPause(); LMenuSetPauseMenu() ;return GS_PAUSED;
+                case SDLK_LSHIFT: PlayerController[PLAYER_SHIFT] = true; break;
+                case SDLK_LCTRL: PlayerController[PLAYER_CTRL] = true; break;
+            }
+            break;
+        case SDL_KEYUP:
+            //Adjust the velocity
+            switch( e->key.keysym.sym )
+            {
+                case SDLK_w: PlayerController[PLAYER_UP] = false; break;
+                case SDLK_s: PlayerController[PLAYER_DOWN] = false; break;
+                case SDLK_a: PlayerController[PLAYER_LEFT] = false; break;
+                case SDLK_d: PlayerController[PLAYER_RIGHT] = false; break;
+                case SDLK_LSHIFT: PlayerController[PLAYER_SHIFT] = false; break;
+                case SDLK_LCTRL: PlayerController[PLAYER_CTRL] = false; break;
+            }
+            break;
     }
-        //If a key was released
-    else if( e->type == SDL_KEYUP && e->key.repeat == 0 )
-    {
-        //Adjust the velocity
-        switch( e->key.keysym.sym )
-        {
-            case SDLK_w: PlayerController[PLAYER_UP] = false; break;
-            case SDLK_s: PlayerController[PLAYER_DOWN] = false; break;
-            case SDLK_a: PlayerController[PLAYER_LEFT] = false; break;
-            case SDLK_d: PlayerController[PLAYER_RIGHT] = false; break;
-        }
-    }
-    else if(e->type == SDL_MOUSEBUTTONDOWN)
-    {
-        int x,y;
-        SDL_GetMouseState( &x, &y );
-        TileMapSetTile(x+camera.x,y+camera.y,TileMapWhatIsAt(x+camera.x, y+camera.y) == 0 ? 1 : 0);
+    if (gameMode == GS_LEVEL_EDIT){
+        EditorMapInteract(e);
+    } else {
+        PlayerMapInteract(e);
     }
     return gameMode;
 }

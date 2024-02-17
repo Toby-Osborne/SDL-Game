@@ -53,6 +53,22 @@ void TileMapSetTile(int x, int y, int val)
     map[INDEX(x / TILE_WIDTH, y / TILE_HEIGHT)] = val;
 }
 
+void TileMapFillTiles(int x1, int y1, int x2, int y2, int val)
+{
+    if (x1 > x2){
+        int temp = x2; x2 = x1; x1 = temp;
+    }
+    if (y1 > y2){
+        int temp = y2; y2 = y1; y1 = temp;
+    }
+    for (int xTile = x1/TILE_WIDTH; xTile <= x2/TILE_WIDTH; xTile++){
+        for (int yTile = y1/TILE_HEIGHT; yTile <= y2/TILE_HEIGHT; yTile++)
+        {
+            map[INDEX(xTile,yTile)] = val;
+        }
+    }
+}
+
 uint8_t TileMapWhatIsAt(int x, int y)
 {
     return map[INDEX(x / TILE_WIDTH, y / TILE_HEIGHT)];

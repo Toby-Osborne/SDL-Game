@@ -39,7 +39,6 @@ void LevelSaveLevel()
     TileMapSaveTileMap(currentLevelPath);
 }
 
-
 void LevelDrawLevel()
 {
     // The textures repeat every 512 pixels, so just snap back there

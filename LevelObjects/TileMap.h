@@ -34,6 +34,8 @@ uint8_t TileMapWhatIsAt(int x, int y);
 
 void TileMapSetTile(int x, int y, int val);
 
+void TileMapFillTiles(int x1, int y1, int x2, int y2, int val);
+
 void TileMapRenderTiles();
 
 void TileMapLoadTileMap(char* path);
