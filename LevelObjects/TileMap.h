@@ -34,7 +34,7 @@ uint8_t TileMapWhatIsAt(int x, int y);
 
 void TileMapSetTile(int x, int y, int val);
 
-void TileMapRenderTiles(SDL_Rect *camera);
+void TileMapRenderTiles();
 
 void TileMapLoadTileMap(char* path);
 

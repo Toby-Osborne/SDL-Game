@@ -7,12 +7,10 @@
 
 #include "main.h"
 #include "LTexture.h"
-#include "LTimer.h"
 #include "LevelObjects/Player.h"
 #include "LevelObjects/LCamera.h"
-#include "LevelObjects/TileMap.h"
-#include "MenuObjects/LButton.h"
 #include "MenuObjects/LMenu.h"
+#include "LevelObjects/Level.h"
 
 
 //Starts up SDL and creates window
@@ -26,14 +24,12 @@ SDL_Window* gWindow = NULL;
 
 //Renderer for textures
 SDL_Renderer* gRenderer = NULL;
-
+extern SDL_Rect camera;
 // Renderer for tiles onto a texture
 
 enum GameStates gState = GS_MENU;
 
 struct LTexture gTextureCharacter;
-struct LTexture gTextureBackground;
-struct LTexture gTextureTile;
 
 bool init()
 {
@@ -92,23 +88,15 @@ bool loadMedia()
 
     // Init all stuff related to level and player
     LTextureInit(&gTextureCharacter);
-    LTextureLoadFromFile(&gTextureCharacter, gRenderer, "GameResources/FatRunTexture.png");
-
-    LTextureInit(&gTextureBackground);
-    LTextureLoadFromFile(&gTextureBackground, gRenderer, "GameResources/bg-tiled.png");
-
-    LTextureInit(&gTextureTile);
-    LTextureLoadFromFile(&gTextureTile, gRenderer, "GameResources/dirt-tile-1.png");
-
+    LTextureLoadFromFile(&gTextureCharacter, "GameResources/FatRunTexture.png");
     LTextureSetBlendMode(&gTextureCharacter, SDL_BLENDMODE_BLEND);
 
-    TileMapInit(&gTextureTile);
-    TileMapLoadTileMap("Levels/level-1.tm");
+    LevelInitLevels();
 
-    PlayerInit(gRenderer, &gTextureCharacter);
+    PlayerInit(&gTextureCharacter);
 
     // Init the menus
-    LMenuInitMenu(gRenderer);
+    LMenuInitMenu();
 
     return success;
 }
@@ -116,9 +104,6 @@ bool loadMedia()
 void closeGame() {
 
     FreeTextures();
-
-    //Save Tilemap
-    TileMapSaveTileMap("Levels/level-1.tm");
 
     LMenuFreeMenus();
 
@@ -152,7 +137,6 @@ int main( int argc, char* args[] )
             bool quit = false;
             SDL_Event e;
 
-            SDL_Rect *camera = LCameraGetCamera();
             while (!quit) {
                 // Handle Inputs
                 while (SDL_PollEvent(&e) != 0) {
@@ -179,8 +163,6 @@ int main( int argc, char* args[] )
                 SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0xFF);
                 SDL_RenderClear(gRenderer);
 
-                SDL_Rect background_render = {camera->x%512, camera->y%512, camera->w, camera->h};
-
                 // Draw whatever
                 switch (gState)
                 {
@@ -188,21 +170,16 @@ int main( int argc, char* args[] )
                         LMenuDrawMenu();
                         break;
                     case GS_LEVEL:
+                        LevelDrawLevel();
+
                         PlayerProcessMovement();
-
-                        LTextureRender(&gTextureBackground,0,0,background_render.w, background_render.h, &background_render);
-
-                        TileMapRenderTiles(camera);
-
-                        PlayerRender(camera->x, camera->y);
+                        PlayerRender(camera.x, camera.y);
                         break;
                     case GS_LEVEL_EDIT:
+                        LevelDrawLevel();
+
                         EditorProcessMovement();
-                        LTextureRender(&gTextureBackground,0,0,background_render.w, background_render.h, &background_render);
-
-                        PlayerRenderDab(camera->x, camera->y);
-
-                        TileMapRenderTiles(camera);
+                        PlayerRenderDab(camera.x, camera.y);
                         break;
                     case GS_PAUSED:
                         LMenuDrawMenu();

@@ -6,10 +6,11 @@
 
 #define MAX_TEXTURES 100
 
+extern SDL_Renderer* gRenderer;
+
 void LTextureInit(struct LTexture *texture)
 {
     texture->mTexture = NULL;
-    texture->mRenderer = NULL;
     texture->mWidth = 0;
     texture->mHeight = 0;
 }
@@ -17,7 +18,7 @@ void LTextureInit(struct LTexture *texture)
 
 struct LTexture * textures[MAX_TEXTURES] = {NULL};
 
-bool LTextureLoadFromFile(struct LTexture *texture, SDL_Renderer* gRenderer, char* path)
+bool LTextureLoadFromFile(struct LTexture *texture, char *path)
 {
     // Register texture object
     for (int i = 0;i<MAX_TEXTURES+1;i++){
@@ -56,47 +57,12 @@ bool LTextureLoadFromFile(struct LTexture *texture, SDL_Renderer* gRenderer, cha
         }
         else
         {
-            texture->mRenderer = gRenderer;
             texture->mWidth = loadedSurface->w;
             texture->mHeight = loadedSurface->h;
         }
         SDL_FreeSurface(loadedSurface);
     }
     texture->mTexture = newTexture;
-    return texture->mTexture != NULL;
-}
-
-bool LTextureLoadFromRenderedText(struct LTexture *texture, SDL_Renderer* gRenderer, char *text, TTF_Font *font, SDL_Color textColor)
-{
-//Get rid of preexisting texture
-    LTextureFree(texture);
-
-    //Render text surface
-    SDL_Surface* textSurface = TTF_RenderText_Solid( font, text, textColor );
-    if( textSurface == NULL )
-    {
-        printf( "Unable to render text surface! SDL_ttf Error: %s\n", TTF_GetError() );
-    }
-    else
-    {
-        //Create texture from surface pixels
-        texture->mTexture = SDL_CreateTextureFromSurface( gRenderer, textSurface );
-        if( texture->mTexture == NULL )
-        {
-            printf( "Unable to create texture from rendered text! SDL Error: %s\n", SDL_GetError() );
-        }
-        else
-        {
-            texture->mRenderer = gRenderer;
-            texture->mWidth = textSurface->w;
-            texture->mHeight = textSurface->h;
-        }
-
-        //Get rid of old surface
-        SDL_FreeSurface( textSurface );
-    }
-
-    //Return success
     return texture->mTexture != NULL;
 }
 
@@ -115,13 +81,13 @@ void LTextureRender(struct LTexture *texture, int x, int y, int w, int h,SDL_Rec
 {
     // Here we create an arbitrary quad and map the texture onto it
     SDL_Rect renderQuad = {x, y, w, h};
-    SDL_RenderCopy(texture->mRenderer, texture->mTexture, clip, &renderQuad);
+    SDL_RenderCopy(gRenderer, texture->mTexture, clip, &renderQuad);
 }
 
 void LTextureRenderEx(struct LTexture *texture, int x, int y, int w, int h,SDL_Rect* clip, double angle, SDL_Point *center, SDL_RendererFlip flip)
 {
     SDL_Rect renderQuad = {x, y, w, h};
-    SDL_RenderCopyEx(texture->mRenderer, texture->mTexture, clip, &renderQuad, angle, center, flip);
+    SDL_RenderCopyEx(gRenderer, texture->mTexture, clip, &renderQuad, angle, center, flip);
 }
 
 void LTextureSetBlendMode(struct LTexture *texture, SDL_BlendMode blending)

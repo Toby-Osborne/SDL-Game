@@ -5,11 +5,12 @@
 #include "LMenu.h"
 #include "SDL_FontCache.h"
 #include "LButton.h"
+#include "../LevelObjects/Level.h"
 #include "../LevelObjects/Player.h"
 
 FC_Font* gFCFont;
 
-SDL_Renderer* menuRenderer;
+extern SDL_Renderer* gRenderer;
 
 enum MenuMenus
 {
@@ -43,6 +44,7 @@ enum GameStates LMenuHandleInput(SDL_Event *e)
     {
         case MENU_MAIN_MENU:
             if (LButtonProcessButton(&MainMenu.startButton, e)) {
+                LevelLoadLevel("Levels/level-1.tm");
                 PlayerUnpause();
                 PlayerSetGameMode(GS_LEVEL);
                 PlayerRespawn();
@@ -63,6 +65,7 @@ enum GameStates LMenuHandleInput(SDL_Event *e)
             if (LButtonProcessButton(&PauseMenu.quitToTitleButton, e))
             {
                 LMenuSetMainMenu();
+                if (PlayerGetGameMode() == GS_LEVEL_EDIT) LevelSaveLevel();
                 return GS_MENU;
             }
     }
@@ -81,28 +84,26 @@ void LMenuDrawMenu()
 }
 
 // CONFIGURE YOUR MENUS HERE
-void LMenuInitMenu(SDL_Renderer* renderer)
+void LMenuInitMenu()
 {
-    menuRenderer = renderer;
-
     // Load the Menu Font
     gFCFont = FC_CreateFont();
-    FC_LoadFont(gFCFont, menuRenderer, "GameResources/Fonts/lazy.ttf", 25, FC_MakeColor(0,0,0,255), TTF_STYLE_NORMAL);
+    FC_LoadFont(gFCFont, gRenderer, "GameResources/Fonts/lazy.ttf", 25, FC_MakeColor(0,0,0,255), TTF_STYLE_NORMAL);
 
     // Init Main Menu Objects
     SDL_Rect startButtonLocation = {(SCREEN_WIDTH-400)/2,(SCREEN_HEIGHT-80)/2-50,400,80};
-    LButtonInitButton(&MainMenu.startButton, menuRenderer, startButtonLocation, "Begin the Game", gFCFont);
+    LButtonInitButton(&MainMenu.startButton, startButtonLocation, "Begin the Game", gFCFont);
 
     SDL_Rect levelEditButtonLocation = {(SCREEN_WIDTH-400)/2,(SCREEN_HEIGHT-80)/2+50,400,80};
-    LButtonInitButton(&MainMenu.editLevelButton, menuRenderer, levelEditButtonLocation, "Level Edit Button", gFCFont);
+    LButtonInitButton(&MainMenu.editLevelButton, levelEditButtonLocation, "Level Edit Button", gFCFont);
 
     SDL_Rect quitButtonLocation = {(SCREEN_WIDTH-400)/2,(SCREEN_HEIGHT-80)/2+150,400,80};
-    LButtonInitButton(&MainMenu.quitButton, menuRenderer, quitButtonLocation, "Quit the Game", gFCFont);
+    LButtonInitButton(&MainMenu.quitButton, quitButtonLocation, "Quit the Game", gFCFont);
 
     // Init Pause Menu Objects
-    LButtonInitButton(&PauseMenu.unpauseButton, menuRenderer, startButtonLocation, "Resume Game", gFCFont);
+    LButtonInitButton(&PauseMenu.unpauseButton, startButtonLocation, "Resume Game", gFCFont);
 
-    LButtonInitButton(&PauseMenu.quitToTitleButton, menuRenderer, levelEditButtonLocation, "Quit to Title", gFCFont);
+    LButtonInitButton(&PauseMenu.quitToTitleButton, levelEditButtonLocation, "Quit to Title", gFCFont);
 }
 
 void LMenuFreeMenus()

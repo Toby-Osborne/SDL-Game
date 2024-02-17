@@ -14,7 +14,6 @@
 struct LTexture
 {
     SDL_Texture* mTexture;
-    SDL_Renderer* mRenderer;
     bool mScaled;
     int mWidth;
     int mHeight;
@@ -30,9 +29,7 @@ void LTextureSetBlendMode(struct LTexture *texture, SDL_BlendMode blending);
 
 void LTextureSetAlpha(struct LTexture *texture, uint8_t alpha);
 
-bool LTextureLoadFromFile(struct LTexture *texture, SDL_Renderer* gRenderer, char* path);
-
-bool LTextureLoadFromRenderedText(struct LTexture *texture, SDL_Renderer* gRenderer, char *text, TTF_Font *font, SDL_Color textColor);
+bool LTextureLoadFromFile(struct LTexture *texture, char *path);
 
 void LTextureRender(struct LTexture *texture, int x, int y, int w, int h,SDL_Rect* clip);
 

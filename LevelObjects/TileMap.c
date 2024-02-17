@@ -5,6 +5,7 @@
 #include "TileMap.h"
 
 struct LTexture * textureMap;
+extern SDL_Rect camera;
 
 SDL_Rect tileClip = {0, 0, TILE_TEXTURE_WIDTH, TILE_TEXTURE_HEIGHT};
 
@@ -62,12 +63,12 @@ int fastTileClamp(int tile, int clamp) {
 }
 
 // Probably need some function for converting a tile ID to a tileClip
-void TileMapRenderTiles(SDL_Rect *camera)
+void TileMapRenderTiles()
 {
-    for (int x_tile = camera->x/TILE_WIDTH;x_tile < fastTileClamp((camera->x+camera->w)/TILE_WIDTH+1,LEVEL_WIDTH_TILES);x_tile++) {
-        for (int y_tile = camera->y/TILE_WIDTH;y_tile < fastTileClamp((camera->y+camera->h)/TILE_WIDTH+1,LEVEL_HEIGHT_TILES );y_tile++) {
+    for (int x_tile = camera.x/TILE_WIDTH;x_tile < fastTileClamp((camera.x+camera.w)/TILE_WIDTH+1,LEVEL_WIDTH_TILES);x_tile++) {
+        for (int y_tile = camera.y/TILE_WIDTH;y_tile < fastTileClamp((camera.y+camera.h)/TILE_WIDTH+1,LEVEL_HEIGHT_TILES );y_tile++) {
             if (!map[INDEX(x_tile,y_tile)]) continue;
-            LTextureRender(textureMap,x_tile*TILE_WIDTH-camera->x,y_tile*TILE_HEIGHT-camera->y,TILE_WIDTH,TILE_HEIGHT,&tileClip);
+            LTextureRender(textureMap,x_tile*TILE_WIDTH-camera.x,y_tile*TILE_HEIGHT-camera.y,TILE_WIDTH,TILE_HEIGHT,&tileClip);
         }
     }
 }

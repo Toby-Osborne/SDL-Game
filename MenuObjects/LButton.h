@@ -24,7 +24,7 @@ struct LButton {
     enum LButtonState buttonState;
 };
 
-void LButtonInitButton(struct LButton* button, SDL_Renderer *renderer, SDL_Rect button_location, char* button_text, FC_Font* font);
+void LButtonInitButton(struct LButton *button, SDL_Rect button_location, char *button_text, FC_Font *font);
 
 bool LButtonProcessButton(struct LButton* button, SDL_Event *e);
 

@@ -8,7 +8,7 @@
 #include "../main.h"
 #include <SDL.h>
 
-void LMenuInitMenu(SDL_Renderer* renderer);
+void LMenuInitMenu();
 
 enum GameStates LMenuHandleInput(SDL_Event *e);
 

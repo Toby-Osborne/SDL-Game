@@ -3,7 +3,6 @@
 //
 
 #include "Player.h"
-#include "../main.h"
 #include "physics.h"
 #include "../LTimer.h"
 #include "LCamera.h"
@@ -19,7 +18,7 @@ const float VEL_DECAY_CONSTANT = 0.8f;
 
 SDL_Rect collision_box;
 
-SDL_Rect *pCamera;
+extern SDL_Rect camera;
 
 struct LTimer playerTimer;
 
@@ -58,13 +57,12 @@ void PlayerSetGameMode(enum GameStates state)
 
 enum GameStates PlayerGetGameMode() {return gameMode;}
 
-void PlayerInit(SDL_Renderer *renderer, struct LTexture* texture)
+void PlayerInit(struct LTexture *texture)
 {
     LTimerInit(&playerTimer);
     LTimerAction(&playerTimer, TIMER_START);
     LTimerInit(&dabTimer);
 
-    pCamera = LCameraGetCamera();
     pTexture = texture;
     collision_box.x = (int)mPosX;
     collision_box.y = (int)mPosY;
@@ -115,7 +113,7 @@ enum GameStates PlayerHandleInput(SDL_Event *e)
     {
         int x,y;
         SDL_GetMouseState( &x, &y );
-        TileMapSetTile(x+pCamera->x,y+pCamera->y,TileMapWhatIsAt(x+pCamera->x, y+pCamera->y) == 0 ? 1 : 0);
+        TileMapSetTile(x+camera.x,y+camera.y,TileMapWhatIsAt(x+camera.x, y+camera.y) == 0 ? 1 : 0);
     }
     return gameMode;
 }

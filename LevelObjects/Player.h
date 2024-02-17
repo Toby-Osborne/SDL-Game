@@ -34,7 +34,7 @@ void PlayerSetGameMode(enum GameStates state);
 
 enum GameStates PlayerGetGameMode();
 
-void PlayerInit(SDL_Renderer *renderer, struct LTexture* texture);
+void PlayerInit(struct LTexture *texture);
 
 enum GameStates PlayerHandleInput(SDL_Event *e);
 

@@ -4,12 +4,11 @@
 
 #include "LButton.h"
 
-SDL_Renderer* buttonRenderer = NULL;
+extern SDL_Renderer* gRenderer;
 
 
-void LButtonInitButton(struct LButton* button, SDL_Renderer *renderer, SDL_Rect button_location, char* button_text, FC_Font* font)
+void LButtonInitButton(struct LButton *button, SDL_Rect button_location, char *button_text, FC_Font *font)
 {
-    if (buttonRenderer == NULL) buttonRenderer = renderer;
     button->buttonLocation = button_location;
     button->buttonState = BUTTON_UNHOVERED;
     button->buttonText = button_text;
@@ -47,16 +46,15 @@ void LButtonRenderButton(struct LButton* button)
     switch (button->buttonState)
     {
         case BUTTON_HOVERED:
-            SDL_SetRenderDrawColor(buttonRenderer, 255, 255, 255, 0xFF);
+            SDL_SetRenderDrawColor(gRenderer, 255, 255, 255, 0xFF);
             break;
         case BUTTON_UNHOVERED:
-            SDL_SetRenderDrawColor(buttonRenderer, 200, 200, 200, 0xFF);
+            SDL_SetRenderDrawColor(gRenderer, 200, 200, 200, 0xFF);
             break;
     }
 
-    SDL_RenderFillRect(buttonRenderer, &button->buttonLocation);
-//    LTextureRender(&button->text,button->buttonLocation.x+(button->buttonLocation.w-button->text.mWidth)/2,button->buttonLocation.y+(button->buttonLocation.h-button->text.mHeight)/2,button->text.mWidth,button->text.mHeight,NULL);
-    FC_DrawAlign(button->buttonFont, buttonRenderer, button->buttonLocation.x+(button->buttonLocation.w)/2,button->buttonLocation.y+(button->buttonLocation.h)/2, FC_ALIGN_CENTER,button->buttonText, NULL);
+    SDL_RenderFillRect(gRenderer, &button->buttonLocation);
+    FC_DrawAlign(button->buttonFont, gRenderer, button->buttonLocation.x+(button->buttonLocation.w)/2,button->buttonLocation.y+(button->buttonLocation.h)/2, FC_ALIGN_CENTER,button->buttonText, NULL);
 }
 
 void LButtonRenderButtons(struct LButton* buttons, int numButtons)
