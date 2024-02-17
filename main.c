@@ -162,13 +162,12 @@ int main( int argc, char* args[] )
                     switch (gState)
                     {
                         case GS_MENU:
+                        case GS_PAUSED:
                             gState = LMenuHandleInput(&e);
                             break;
                         case GS_LEVEL:
-                            gState = PlayerHandleEvent(&e);
-                            break;
-                        case GS_PAUSED:
-                            gState = LMenuHandleInput(&e);
+                        case GS_LEVEL_EDIT:
+                            gState = PlayerHandleInput(&e);
                             break;
                         case GS_Quit:
                             quit = true;
@@ -180,6 +179,8 @@ int main( int argc, char* args[] )
                 SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0xFF);
                 SDL_RenderClear(gRenderer);
 
+                SDL_Rect background_render = {camera->x%512, camera->y%512, camera->w, camera->h};
+
                 // Draw whatever
                 switch (gState)
                 {
@@ -189,12 +190,19 @@ int main( int argc, char* args[] )
                     case GS_LEVEL:
                         PlayerProcessMovement();
 
-                        SDL_Rect background_render = {camera->x%512, camera->y%512, camera->w, camera->h};
                         LTextureRender(&gTextureBackground,0,0,background_render.w, background_render.h, &background_render);
 
                         TileMapRenderTiles(camera);
 
                         PlayerRender(camera->x, camera->y);
+                        break;
+                    case GS_LEVEL_EDIT:
+                        EditorProcessMovement();
+                        LTextureRender(&gTextureBackground,0,0,background_render.w, background_render.h, &background_render);
+
+                        PlayerRenderDab(camera->x, camera->y);
+
+                        TileMapRenderTiles(camera);
                         break;
                     case GS_PAUSED:
                         LMenuDrawMenu();

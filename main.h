@@ -15,6 +15,7 @@ enum GameStates
 {
     GS_MENU,
     GS_LEVEL,
+    GS_LEVEL_EDIT,
     GS_PAUSED,
     GS_Quit
 };

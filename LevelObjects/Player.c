@@ -27,17 +27,36 @@ struct LTimer dabTimer;
 
 struct LTexture *pTexture;
 
-bool paused = true;
+enum GameStates gameMode;
+
+void PlayerRespawn()
+{
+    LTimerStopwatch(&playerTimer);
+    mPosX = 0;
+    mPosY = 0;
+    mVelX = 0;
+    mVelY = 0;
+}
 
 void PlayerPause() {
-    paused = true;
     LTimerAction(&playerTimer, TIMER_PAUSE);
 }
 
 void PlayerUnpause() {
-    paused = false;
     LTimerAction(&playerTimer, TIMER_UNPAUSE);
 }
+
+void PlayerSetGameMode(enum GameStates state)
+{
+    if ((state != GS_LEVEL_EDIT)&&(state != GS_LEVEL))
+    {
+        printf("Tried to set invalid game mode");
+        return;
+    }
+    gameMode = state;
+}
+
+enum GameStates PlayerGetGameMode() {return gameMode;}
 
 void PlayerInit(SDL_Renderer *renderer, struct LTexture* texture)
 {
@@ -56,16 +75,16 @@ void PlayerInit(SDL_Renderer *renderer, struct LTexture* texture)
 }
 
 enum PlayerVControllerKeys {
-    UP,
-    DOWN,
-    LEFT,
-    RIGHT,
-    NUM_CONTROLS = 5,
+    PLAYER_UP,
+    PLAYER_DOWN,
+    PLAYER_LEFT,
+    PLAYER_RIGHT,
+    NUM_CONTROLS,
 };
 
 bool PlayerController[NUM_CONTROLS] = {0};
 
-enum GameStates PlayerHandleEvent(SDL_Event *e)
+enum GameStates PlayerHandleInput(SDL_Event *e)
 {
     //If a key was pressed
     if( e->type == SDL_KEYDOWN && e->key.repeat == 0 )
@@ -73,10 +92,10 @@ enum GameStates PlayerHandleEvent(SDL_Event *e)
         //Adjust the velocity
         switch( e->key.keysym.sym )
         {
-            case SDLK_w: PlayerController[UP] = true; return GS_LEVEL;
-            case SDLK_s: PlayerController[DOWN] = true; return GS_LEVEL;
-            case SDLK_a: PlayerController[LEFT] = true; return GS_LEVEL;
-            case SDLK_d: PlayerController[RIGHT] = true; return GS_LEVEL;
+            case SDLK_w: PlayerController[PLAYER_UP] = true; break;
+            case SDLK_s: PlayerController[PLAYER_DOWN] = true; break;
+            case SDLK_a: PlayerController[PLAYER_LEFT] = true; break;
+            case SDLK_d: PlayerController[PLAYER_RIGHT] = true; break;
             case SDLK_ESCAPE: PlayerPause(); LMenuSetPauseMenu() ;return GS_PAUSED;
         }
     }
@@ -86,10 +105,10 @@ enum GameStates PlayerHandleEvent(SDL_Event *e)
         //Adjust the velocity
         switch( e->key.keysym.sym )
         {
-            case SDLK_w: PlayerController[UP] = false; return GS_LEVEL;
-            case SDLK_s: PlayerController[DOWN] = false; return GS_LEVEL;
-            case SDLK_a: PlayerController[LEFT] = false; return GS_LEVEL;
-            case SDLK_d: PlayerController[RIGHT] = false; return GS_LEVEL;
+            case SDLK_w: PlayerController[PLAYER_UP] = false; break;
+            case SDLK_s: PlayerController[PLAYER_DOWN] = false; break;
+            case SDLK_a: PlayerController[PLAYER_LEFT] = false; break;
+            case SDLK_d: PlayerController[PLAYER_RIGHT] = false; break;
         }
     }
     else if(e->type == SDL_MOUSEBUTTONDOWN)
@@ -98,7 +117,7 @@ enum GameStates PlayerHandleEvent(SDL_Event *e)
         SDL_GetMouseState( &x, &y );
         TileMapSetTile(x+pCamera->x,y+pCamera->y,TileMapWhatIsAt(x+pCamera->x, y+pCamera->y) == 0 ? 1 : 0);
     }
-    return GS_LEVEL;
+    return gameMode;
 }
 
 
@@ -136,7 +155,7 @@ int playerDistX = 0;
 
 void PlayerProcessMovement()
 {
-    switch(PlayerController[UP]+(PlayerController[DOWN]<<1))
+    switch(PlayerController[PLAYER_UP] + (PlayerController[PLAYER_DOWN] << 1))
     {
         case 0:
             break;
@@ -149,7 +168,7 @@ void PlayerProcessMovement()
             mVelY = PLAYER_VELOCITY;
             break;
     }
-    switch(PlayerController[LEFT]+(PlayerController[RIGHT]<<1))
+    switch(PlayerController[PLAYER_LEFT] + (PlayerController[PLAYER_RIGHT] << 1))
     {
         case 0:
             mVelX *= VEL_DECAY_CONSTANT;
@@ -221,6 +240,32 @@ void PlayerProcessMovement()
     LCameraProcessMovement();
 }
 
+void EditorProcessMovement()
+{
+    int horizontalMoveConst = PlayerController[PLAYER_LEFT] + (PlayerController[PLAYER_RIGHT] << 1);
+    int verticalMoveConst = PlayerController[PLAYER_UP] + (PlayerController[PLAYER_DOWN] << 1);
+    switch (horizontalMoveConst)
+    {
+        case 1:
+            if ((int)mPosX - TILE_WIDTH > 0) mPosX -= TILE_WIDTH; break;
+        case 2:
+            if ((int)mPosX + TILE_WIDTH < LEVEL_WIDTH) mPosX += TILE_WIDTH; break;
+        default:
+            break;
+    }
+    switch (verticalMoveConst)
+    {
+        case 1:
+            if ((int)mPosY - TILE_HEIGHT > 0) mPosY -= TILE_HEIGHT; break;
+        case 2:
+            if ((int)mPosY + TILE_HEIGHT < LEVEL_HEIGHT) mPosY += TILE_HEIGHT; break;
+        default:
+            break;
+    }
+    LCameraProcessMovement();
+
+}
+
 const int dabTime = 5000;
 
 enum PlayerSprites {
@@ -250,7 +295,7 @@ int RunFrameCounter;
 
 void PlayerRender(int camX, int camY)
 {
-    int inputPos = PlayerController[UP]+(PlayerController[DOWN]<<1)+(PlayerController[LEFT]<<2)+(PlayerController[RIGHT]<<3);
+    int inputPos = PlayerController[PLAYER_UP] + (PlayerController[PLAYER_DOWN] << 1) + (PlayerController[PLAYER_LEFT] << 2) + (PlayerController[PLAYER_RIGHT] << 3);
     // The greatest state machine in the world...
     // Tribute...
     switch (PlayerState)
@@ -261,15 +306,15 @@ void PlayerRender(int camX, int camY)
             if (LTimerGetTicks(&dabTimer) > dabTime) {
                 PlayerState = PDAB;
             }
-            else if (PlayerController[UP])
+            else if (PlayerController[PLAYER_UP])
             {
                 PlayerState = PJUMP;
             }
-            else if (PlayerController[DOWN])
+            else if (PlayerController[PLAYER_DOWN])
             {
                 PlayerState = PCROUCH;
             }
-            else if (PlayerController[LEFT] || PlayerController[RIGHT])
+            else if (PlayerController[PLAYER_LEFT] || PlayerController[PLAYER_RIGHT])
             {
                 PlayerState = PRUN;
             }
@@ -282,11 +327,11 @@ void PlayerRender(int camX, int camY)
             LTimerAction(&dabTimer,TIMER_STOP); // If we didn't break above, then we left STOP state
             break;
         case PRUN:
-            if (!PlayerController[LEFT]&&!PlayerController[RIGHT]&&PlayerController[DOWN])
+            if (!PlayerController[PLAYER_LEFT] && !PlayerController[PLAYER_RIGHT] && PlayerController[PLAYER_DOWN])
             {
                 PlayerState = PCROUCH;
             }
-            else if (PlayerController[UP]) {
+            else if (PlayerController[PLAYER_UP]) {
                 PlayerState = PJUMP;
             }
             else if (!inputPos)
@@ -302,10 +347,10 @@ void PlayerRender(int camX, int camY)
             RunFrameCounter = 0;
             break;
         case PCROUCH:
-            if (PlayerController[LEFT] || PlayerController[RIGHT]) {
+            if (PlayerController[PLAYER_LEFT] || PlayerController[PLAYER_RIGHT]) {
                 PlayerState = PRUN;
             }
-            else if (!PlayerController[DOWN])
+            else if (!PlayerController[PLAYER_DOWN])
             {
                 if (!TileMapWhatIsAt((int)mPosX,(int)mPosY+PLAYER_HEIGHT+1))
                 {
@@ -337,6 +382,14 @@ void PlayerRender(int camX, int camY)
     int height_offset = 8;
     SDL_Rect clip = {64*(int)AnimationFrame,0,PLAYER_TEXTURE_WIDTH,PLAYER_TEXTURE_HEIGHT};
     LTextureRenderEx(pTexture, (int)mPosX-camX-(PLAYER_HEIGHT-PLAYER_WIDTH)/2, (int)mPosY-camY+height_offset, PLAYER_HEIGHT, PLAYER_HEIGHT, &clip, 0.0f, NULL, mVelX > 0 ? SDL_FLIP_NONE : SDL_FLIP_HORIZONTAL);
+}
+
+void PlayerRenderDab(int camX, int camY)
+{
+    int height_offset = 8;
+    SDL_Rect clip = {64*(int)KDAB,0,PLAYER_TEXTURE_WIDTH,PLAYER_TEXTURE_HEIGHT};
+    LTextureRenderEx(pTexture, (int)mPosX-camX-(PLAYER_HEIGHT-PLAYER_WIDTH)/2, (int)mPosY-camY+height_offset, PLAYER_HEIGHT, PLAYER_HEIGHT, &clip, 0.0f, NULL, mVelX > 0 ? SDL_FLIP_NONE : SDL_FLIP_HORIZONTAL);
+
 }
 
 int PlayerGetX(){ return (int)mPosX; }

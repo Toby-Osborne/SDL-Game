@@ -20,14 +20,6 @@
 //Maximum axis velocity of the dot
 static const float PLAYER_VELOCITY = 1.5f;
 
-void PlayerInit(SDL_Renderer *renderer, struct LTexture* texture);
-
-enum GameStates PlayerHandleEvent(SDL_Event *e);
-
-void PlayerProcessMovement();
-
-void PlayerRender(int camX, int camY);
-
 int PlayerGetX();
 
 int PlayerGetY();
@@ -35,5 +27,24 @@ int PlayerGetY();
 void PlayerPause();
 
 void PlayerUnpause();
+
+void PlayerRespawn();
+
+void PlayerSetGameMode(enum GameStates state);
+
+enum GameStates PlayerGetGameMode();
+
+void PlayerInit(SDL_Renderer *renderer, struct LTexture* texture);
+
+enum GameStates PlayerHandleInput(SDL_Event *e);
+
+void PlayerProcessMovement();
+
+void EditorProcessMovement();
+
+void PlayerRender(int camX, int camY);
+
+void PlayerRenderDab(int camX, int camY);
+
 
 #endif //SDLGAME_PLAYER_H
