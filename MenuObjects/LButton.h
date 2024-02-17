@@ -18,18 +18,15 @@ enum LButtonState {
 };
 
 struct LButton {
-    void (*CBFunc)();
     SDL_Rect buttonLocation;
     char* buttonText;
     FC_Font* buttonFont;
     enum LButtonState buttonState;
 };
 
-void LButtonInitButton(struct LButton* button, SDL_Renderer *renderer, SDL_Rect button_location, char* button_text, FC_Font* font, void (*cb_func)());
+void LButtonInitButton(struct LButton* button, SDL_Renderer *renderer, SDL_Rect button_location, char* button_text, FC_Font* font);
 
 bool LButtonProcessButton(struct LButton* button, SDL_Event *e);
-
-void LButtonProcessButtons(SDL_Event *e, struct LButton* buttons, int numButtons);
 
 void LButtonRenderButton(struct LButton* button);
 

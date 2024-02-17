@@ -8,6 +8,7 @@
 #include <SDL.h>
 
 #include "../LTexture.h"
+#include "../main.h"
 
 //The dimensions of the dot
 #define PLAYER_HEIGHT 128
@@ -21,7 +22,7 @@ static const float PLAYER_VELOCITY = 1.5f;
 
 void PlayerInit(SDL_Renderer *renderer, struct LTexture* texture);
 
-void PlayerHandleEvent(SDL_Event *e);
+enum GameStates PlayerHandleEvent(SDL_Event *e);
 
 void PlayerProcessMovement();
 

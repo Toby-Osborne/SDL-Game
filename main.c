@@ -12,6 +12,7 @@
 #include "LevelObjects/LCamera.h"
 #include "LevelObjects/TileMap.h"
 #include "MenuObjects/LButton.h"
+#include "MenuObjects/LMenu.h"
 
 
 //Starts up SDL and creates window
@@ -28,15 +29,11 @@ SDL_Renderer* gRenderer = NULL;
 
 // Renderer for tiles onto a texture
 
-FC_Font* gFCFont;
+enum GameStates gState = GS_MENU;
 
 struct LTexture gTextureCharacter;
 struct LTexture gTextureBackground;
 struct LTexture gTextureTile;
-
-struct mainMenu {
-    struct LButton StartButton;
-} mainMenu;
 
 bool init()
 {
@@ -75,8 +72,6 @@ bool init()
         }
         else
         {
-            gFCFont = FC_CreateFont();
-
             SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
             //Initialize PNG loading
             int imgFlags = IMG_INIT_PNG;
@@ -90,21 +85,12 @@ bool init()
     return success;
 }
 
-bool start_game = false;
-
-void StartGameCallback()
-{
-    start_game = true;
-    PlayerUnpause();
-}
-
 bool loadMedia()
 {
     //Loading success flag
     bool success = true;
 
-    FC_LoadFont(gFCFont, gRenderer, "GameResources/Fonts/lazy.ttf", 25, FC_MakeColor(0,0,0,255), TTF_STYLE_NORMAL);
-
+    // Init all stuff related to level and player
     LTextureInit(&gTextureCharacter);
     LTextureLoadFromFile(&gTextureCharacter, gRenderer, "GameResources/FatRunTexture.png");
 
@@ -117,13 +103,12 @@ bool loadMedia()
     LTextureSetBlendMode(&gTextureCharacter, SDL_BLENDMODE_BLEND);
 
     TileMapInit(&gTextureTile);
-
-    SDL_Rect button_location = {(SCREEN_WIDTH-400)/2,(SCREEN_HEIGHT-80)/2,400,80};
-    LButtonInitButton(&(mainMenu.StartButton), gRenderer, button_location, "Begin the Game", gFCFont, &StartGameCallback);
-
     TileMapLoadTileMap("Levels/level-1.tm");
 
     PlayerInit(gRenderer, &gTextureCharacter);
+
+    // Init the menus
+    LMenuInitMenu(gRenderer);
 
     return success;
 }
@@ -135,8 +120,7 @@ void closeGame() {
     //Save Tilemap
     TileMapSaveTileMap("Levels/level-1.tm");
 
-    //Free global gFCFont
-    FC_FreeFont(gFCFont);
+    LMenuFreeMenus();
 
     //Destroy window
     SDL_DestroyRenderer( gRenderer );
@@ -175,10 +159,20 @@ int main( int argc, char* args[] )
                     if (e.type == SDL_QUIT) {
                         quit = true;
                     }
-                    if (start_game) {
-                        PlayerHandleEvent(&e);
-                    } else {
-                        LButtonProcessButtons(&e,(struct LButton*)(&mainMenu),1);
+                    switch (gState)
+                    {
+                        case GS_MENU:
+                            gState = LMenuHandleInput(&e);
+                            break;
+                        case GS_LEVEL:
+                            gState = PlayerHandleEvent(&e);
+                            break;
+                        case GS_PAUSED:
+                            gState = LMenuHandleInput(&e);
+                            break;
+                        case GS_Quit:
+                            quit = true;
+                            break;
                     }
                 }
 
@@ -186,16 +180,28 @@ int main( int argc, char* args[] )
                 SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0xFF);
                 SDL_RenderClear(gRenderer);
 
-                if (start_game) {
-                    PlayerProcessMovement();
-                    SDL_Rect background_render = {camera->x%512, camera->y%512, camera->w, camera->h};
-                    LTextureRender(&gTextureBackground,0,0,background_render.w, background_render.h, &background_render);
+                // Draw whatever
+                switch (gState)
+                {
+                    case GS_MENU:
+                        LMenuDrawMenu();
+                        break;
+                    case GS_LEVEL:
+                        PlayerProcessMovement();
 
-                    TileMapRenderTiles(camera);
+                        SDL_Rect background_render = {camera->x%512, camera->y%512, camera->w, camera->h};
+                        LTextureRender(&gTextureBackground,0,0,background_render.w, background_render.h, &background_render);
 
-                    PlayerRender(camera->x, camera->y);
-                } else {
-                    LButtonRenderButtons((struct LButton*)(&mainMenu),1);
+                        TileMapRenderTiles(camera);
+
+                        PlayerRender(camera->x, camera->y);
+                        break;
+                    case GS_PAUSED:
+                        LMenuDrawMenu();
+                        break;
+                    case GS_Quit:
+                        printf("Closing...");
+                        break;
                 }
 
                 SDL_RenderPresent(gRenderer);

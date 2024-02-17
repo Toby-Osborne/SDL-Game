@@ -8,6 +8,7 @@
 #include "../LTimer.h"
 #include "LCamera.h"
 #include "TileMap.h"
+#include "../MenuObjects/LMenu.h"
 float mPosX, mPosY;
 
 float mPosXPlus, mPosYPlus;
@@ -64,24 +65,19 @@ enum PlayerVControllerKeys {
 
 bool PlayerController[NUM_CONTROLS] = {0};
 
-void PlayerHandleEvent(SDL_Event *e)
+enum GameStates PlayerHandleEvent(SDL_Event *e)
 {
     //If a key was pressed
     if( e->type == SDL_KEYDOWN && e->key.repeat == 0 )
     {
-        if (e->key.keysym.sym == SDLK_SPACE)
-        {
-            PlayerUnpause();
-        }
-        if (paused) return;
         //Adjust the velocity
         switch( e->key.keysym.sym )
         {
-            case SDLK_w: PlayerController[UP] = true; break;
-            case SDLK_s: PlayerController[DOWN] = true; break;
-            case SDLK_a: PlayerController[LEFT] = true; break;
-            case SDLK_d: PlayerController[RIGHT] = true; break;
-            case SDLK_ESCAPE: PlayerPause(); break;
+            case SDLK_w: PlayerController[UP] = true; return GS_LEVEL;
+            case SDLK_s: PlayerController[DOWN] = true; return GS_LEVEL;
+            case SDLK_a: PlayerController[LEFT] = true; return GS_LEVEL;
+            case SDLK_d: PlayerController[RIGHT] = true; return GS_LEVEL;
+            case SDLK_ESCAPE: PlayerPause(); LMenuSetPauseMenu() ;return GS_PAUSED;
         }
     }
         //If a key was released
@@ -90,10 +86,10 @@ void PlayerHandleEvent(SDL_Event *e)
         //Adjust the velocity
         switch( e->key.keysym.sym )
         {
-            case SDLK_w: PlayerController[UP] = false; break;
-            case SDLK_s: PlayerController[DOWN] = false; break;
-            case SDLK_a: PlayerController[LEFT] = false; break;
-            case SDLK_d: PlayerController[RIGHT] = false; break;
+            case SDLK_w: PlayerController[UP] = false; return GS_LEVEL;
+            case SDLK_s: PlayerController[DOWN] = false; return GS_LEVEL;
+            case SDLK_a: PlayerController[LEFT] = false; return GS_LEVEL;
+            case SDLK_d: PlayerController[RIGHT] = false; return GS_LEVEL;
         }
     }
     else if(e->type == SDL_MOUSEBUTTONDOWN)
@@ -102,6 +98,7 @@ void PlayerHandleEvent(SDL_Event *e)
         SDL_GetMouseState( &x, &y );
         TileMapSetTile(x+pCamera->x,y+pCamera->y,TileMapWhatIsAt(x+pCamera->x, y+pCamera->y) == 0 ? 1 : 0);
     }
+    return GS_LEVEL;
 }
 
 
@@ -139,7 +136,6 @@ int playerDistX = 0;
 
 void PlayerProcessMovement()
 {
-    if (paused) return;
     switch(PlayerController[UP]+(PlayerController[DOWN]<<1))
     {
         case 0:

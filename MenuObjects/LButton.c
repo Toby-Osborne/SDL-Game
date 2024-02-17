@@ -7,12 +7,11 @@
 SDL_Renderer* buttonRenderer = NULL;
 
 
-void LButtonInitButton(struct LButton* button, SDL_Renderer *renderer, SDL_Rect button_location, char* button_text, FC_Font* font, void (*cb_func)())
+void LButtonInitButton(struct LButton* button, SDL_Renderer *renderer, SDL_Rect button_location, char* button_text, FC_Font* font)
 {
     if (buttonRenderer == NULL) buttonRenderer = renderer;
     button->buttonLocation = button_location;
     button->buttonState = BUTTON_UNHOVERED;
-    button->CBFunc = cb_func;
     button->buttonText = button_text;
     button->buttonFont = font;
 }
@@ -32,7 +31,7 @@ bool LButtonProcessButton(struct LButton* button, SDL_Event *e)
                     button->buttonState = BUTTON_HOVERED;
                     break;
                 case SDL_MOUSEBUTTONDOWN:
-                    if (button->CBFunc != NULL) (*button->CBFunc)();   // Callback function to do something
+                    return true;
                     break;
             }
         } else {
@@ -40,11 +39,7 @@ bool LButtonProcessButton(struct LButton* button, SDL_Event *e)
             button->buttonState = BUTTON_UNHOVERED;
         }
     }
-}
-
-void LButtonProcessButtons(SDL_Event *e, struct LButton* buttons, int numButtons)
-{
-    for (int i = 0;i<numButtons;i++) LButtonProcessButton(&(buttons[i]),e);
+    return false;
 }
 
 void LButtonRenderButton(struct LButton* button)

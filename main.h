@@ -13,8 +13,9 @@ static const int SCREEN_HEIGHT = 1440;
 
 enum GameStates
 {
-    GS_MAIN_MENU,
+    GS_MENU,
     GS_LEVEL,
-    GS_PAUSED
+    GS_PAUSED,
+    GS_Quit
 };
 #endif //SDLGAME_MAIN_H
