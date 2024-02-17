@@ -23,6 +23,8 @@ add_executable(SDL2Test main.c main.h
         MenuObjects/LMenu.h
         LevelObjects/Level.c
         LevelObjects/Level.h
+        MenuObjects/Inventory.c
+        MenuObjects/Inventory.h
 )
 
 INCLUDE(FindPkgConfig)

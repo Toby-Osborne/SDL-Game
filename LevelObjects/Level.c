@@ -3,7 +3,6 @@
 //
 
 #include "Level.h"
-#include "../LTexture.h"
 #include "TileMap.h"
 #include "string.h"
 

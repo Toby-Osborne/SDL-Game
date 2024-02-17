@@ -4,12 +4,6 @@
 
 #include "TileMap.h"
 
-#define TILE_TEXTURE_WIDTH 16
-#define TILE_TEXTURE_HEIGHT 16
-
-#define TILE_TEXTURE_MAP_WIDTH_TILES 32
-#define TILE_TEXTURE_MAP_HEIGHT_TILES 32
-
 extern SDL_Rect camera;
 
 SDL_Rect tileClip = {0, 0, TILE_TEXTURE_WIDTH, TILE_TEXTURE_HEIGHT};
@@ -35,9 +29,14 @@ void TileMapLoadTileMap(char* path)
     }
     for (int i = 0;i<LEVEL_WIDTH_TILES*LEVEL_HEIGHT_TILES;i++)
     {
-        SDL_RWread( file, &map[i], sizeof(uint8_t), 1);
+        SDL_RWread( file, &map[i], sizeof(map[0]), 1);
     }
     SDL_RWclose(file);
+}
+
+struct LTexture *TileMapGetTexture()
+{
+    return &gTextureTile;
 }
 
 void TileMapSaveTileMap(char* path)
@@ -50,7 +49,7 @@ void TileMapSaveTileMap(char* path)
     }
     for (int i = 0;i<LEVEL_WIDTH_TILES*LEVEL_HEIGHT_TILES;i++)
     {
-        SDL_RWwrite(file, &map[i], sizeof(uint8_t), 1);
+        SDL_RWwrite(file, &map[i], sizeof(map[0]), 1);
     }
 
     SDL_RWclose(file);
@@ -92,6 +91,7 @@ void TileMapRenderTiles()
     for (int x_tile = camera.x/TILE_WIDTH;x_tile < fastTileClamp((camera.x+camera.w)/TILE_WIDTH+1,LEVEL_WIDTH_TILES);x_tile++) {
         for (int y_tile = camera.y/TILE_WIDTH;y_tile < fastTileClamp((camera.y+camera.h)/TILE_WIDTH+1,LEVEL_HEIGHT_TILES );y_tile++) {
             if (!map[INDEX(x_tile,y_tile)]) continue;
+            // TODO: Maybe bake a lookup table for this for speed?
             tileClip.x = TILE_TEXTURE_WIDTH * (map[INDEX(x_tile,y_tile)]%TILE_TEXTURE_MAP_WIDTH_TILES);
             tileClip.y = TILE_TEXTURE_WIDTH * (map[INDEX(x_tile,y_tile)]/TILE_TEXTURE_MAP_WIDTH_TILES);
             LTextureRender(&gTextureTile,x_tile*TILE_WIDTH-camera.x,y_tile*TILE_HEIGHT-camera.y,TILE_WIDTH,TILE_HEIGHT,&tileClip);

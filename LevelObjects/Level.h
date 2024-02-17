@@ -5,6 +5,8 @@
 #ifndef SDLGAME_LEVEL_H
 #define SDLGAME_LEVEL_H
 
+#include "../LTexture.h"
+
 void LevelInitLevels();
 
 void LevelLoadLevel(char * path);

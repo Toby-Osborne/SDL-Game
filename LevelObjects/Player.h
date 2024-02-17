@@ -30,6 +30,8 @@ void PlayerUnpause();
 
 void PlayerRespawn();
 
+void EditorSetCurrentTile(int tileVal);
+
 void PlayerSetGameMode(enum GameStates state);
 
 enum GameStates PlayerGetGameMode();
@@ -43,8 +45,5 @@ void PlayerProcessMovement();
 void EditorProcessMovement();
 
 void PlayerRender(int camX, int camY);
-
-void PlayerRenderDab(int camX, int camY);
-
 
 #endif //SDLGAME_PLAYER_H

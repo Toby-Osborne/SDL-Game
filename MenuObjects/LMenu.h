@@ -21,4 +21,6 @@ void LMenuSetMainMenu();
 
 void LMenuSetPauseMenu();
 
+void LMenuSetInventoryMenu();
+
 #endif //SDLGAME_LMENU_H

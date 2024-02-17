@@ -88,6 +88,8 @@ int dragStartX,dragStartY;
 
 int currentPlacingTile = 1;
 
+void EditorSetCurrentTile(int tileVal) {currentPlacingTile = tileVal;}
+
 void EditorMapInteract(SDL_Event *e)
 {
     int x, y = {0};
@@ -108,16 +110,6 @@ void EditorMapInteract(SDL_Event *e)
             if (PlayerController[PLAYER_SHIFT]) {
                 SDL_GetMouseState(&x, &y);
                 TileMapFillTiles(x + camera.x,y + camera.y,dragStartX,dragStartY,e->button.button == SDL_BUTTON_LEFT ? currentPlacingTile : 0);
-            }
-            break;
-        case SDL_KEYDOWN:
-            switch(e->key.keysym.sym)
-            {
-                case SDLK_e:
-                    currentPlacingTile = (currentPlacingTile + 1)%256;
-                    break;
-                case SDLK_q:
-                    currentPlacingTile = (currentPlacingTile - 1)%256;
             }
             break;
     }
@@ -142,10 +134,10 @@ enum GameStates PlayerHandleInput(SDL_Event *e)
                 case SDLK_s: PlayerController[PLAYER_DOWN] = true; break;
                 case SDLK_a: PlayerController[PLAYER_LEFT] = true; break;
                 case SDLK_d: PlayerController[PLAYER_RIGHT] = true; break;
-                case SDLK_ESCAPE: PlayerPause(); LMenuSetPauseMenu() ;return GS_PAUSED;
+                case SDLK_e: PlayerPause(); LMenuSetInventoryMenu(); return GS_PAUSED;
+                case SDLK_ESCAPE: PlayerPause(); LMenuSetPauseMenu(); return GS_PAUSED;
                 case SDLK_LSHIFT: PlayerController[PLAYER_SHIFT] = true; break;
                 case SDLK_LCTRL: PlayerController[PLAYER_CTRL] = true; break;
-
                 // Edit Specific
 
             }
@@ -346,101 +338,97 @@ int RunFrameCounter;
 
 void PlayerRender(int camX, int camY)
 {
-    int inputPos = PlayerController[PLAYER_UP] + (PlayerController[PLAYER_DOWN] << 1) + (PlayerController[PLAYER_LEFT] << 2) + (PlayerController[PLAYER_RIGHT] << 3);
-    // The greatest state machine in the world...
-    // Tribute...
-    switch (PlayerState)
-    {
-        case PSTOP:
-            AnimationFrame = KSTOP;
-            if (!LTimerStarted(&dabTimer)) LTimerAction(&dabTimer, TIMER_START);
-            if (LTimerGetTicks(&dabTimer) > dabTime) {
-                PlayerState = PDAB;
-            }
-            else if (PlayerController[PLAYER_UP])
-            {
-                PlayerState = PJUMP;
-            }
-            else if (PlayerController[PLAYER_DOWN])
-            {
-                PlayerState = PCROUCH;
-            }
-            else if (PlayerController[PLAYER_LEFT] || PlayerController[PLAYER_RIGHT])
-            {
-                PlayerState = PRUN;
-            }
-            else
-            {
-                // Set animation
+    if (gameMode == GS_LEVEL){
+        int inputPos = PlayerController[PLAYER_UP] + (PlayerController[PLAYER_DOWN] << 1) + (PlayerController[PLAYER_LEFT] << 2) + (PlayerController[PLAYER_RIGHT] << 3);
+        // The greatest state machine in the world...
+        // Tribute...
+        switch (PlayerState)
+        {
+            case PSTOP:
                 AnimationFrame = KSTOP;
-                break;
-            }
-            LTimerAction(&dabTimer,TIMER_STOP); // If we didn't break above, then we left STOP state
-            break;
-        case PRUN:
-            if (!PlayerController[PLAYER_LEFT] && !PlayerController[PLAYER_RIGHT] && PlayerController[PLAYER_DOWN])
-            {
-                PlayerState = PCROUCH;
-            }
-            else if (PlayerController[PLAYER_UP]) {
-                PlayerState = PJUMP;
-            }
-            else if (!inputPos)
-            {
-                PlayerState = PSTOP;
-            }
-            else
-            {
-                RunFrameCounter = (RunFrameCounter + 1) % RunFrameCap;
-                AnimationFrame = RunFrameCounter/(RunFrameCap/RunFrames);
-                break;
-            }
-            RunFrameCounter = 0;
-            break;
-        case PCROUCH:
-            if (PlayerController[PLAYER_LEFT] || PlayerController[PLAYER_RIGHT]) {
-                PlayerState = PRUN;
-            }
-            else if (!PlayerController[PLAYER_DOWN])
-            {
-                if (!TileMapWhatIsAt((int)mPosX,(int)mPosY+PLAYER_HEIGHT+1))
+                if (!LTimerStarted(&dabTimer)) LTimerAction(&dabTimer, TIMER_START);
+                if (LTimerGetTicks(&dabTimer) > dabTime) {
+                    PlayerState = PDAB;
+                }
+                else if (PlayerController[PLAYER_UP])
                 {
                     PlayerState = PJUMP;
                 }
+                else if (PlayerController[PLAYER_DOWN])
+                {
+                    PlayerState = PCROUCH;
+                }
+                else if (PlayerController[PLAYER_LEFT] || PlayerController[PLAYER_RIGHT])
+                {
+                    PlayerState = PRUN;
+                }
                 else
+                {
+                    // Set animation
+                    AnimationFrame = KSTOP;
+                    break;
+                }
+                LTimerAction(&dabTimer,TIMER_STOP); // If we didn't break above, then we left STOP state
+                break;
+            case PRUN:
+                if (!PlayerController[PLAYER_LEFT] && !PlayerController[PLAYER_RIGHT] && PlayerController[PLAYER_DOWN])
+                {
+                    PlayerState = PCROUCH;
+                }
+                else if (PlayerController[PLAYER_UP]) {
+                    PlayerState = PJUMP;
+                }
+                else if (!inputPos)
                 {
                     PlayerState = PSTOP;
                 }
-            }
-            AnimationFrame = KCROUCH;
-            break;
-        case PJUMP:
-            // We only exit jump if something below
-            if (TileMapWhatIsAt((int)mPosX,(int)mPosY+PLAYER_HEIGHT+2)) {
-                PlayerState = PRUN;
-            }
-            AnimationFrame = KJUMP;
-            break;
+                else
+                {
+                    RunFrameCounter = (RunFrameCounter + 1) % RunFrameCap;
+                    AnimationFrame = RunFrameCounter/(RunFrameCap/RunFrames);
+                    break;
+                }
+                RunFrameCounter = 0;
+                break;
+            case PCROUCH:
+                if (PlayerController[PLAYER_LEFT] || PlayerController[PLAYER_RIGHT]) {
+                    PlayerState = PRUN;
+                }
+                else if (!PlayerController[PLAYER_DOWN])
+                {
+                    if (!TileMapWhatIsAt((int)mPosX,(int)mPosY+PLAYER_HEIGHT+1))
+                    {
+                        PlayerState = PJUMP;
+                    }
+                    else
+                    {
+                        PlayerState = PSTOP;
+                    }
+                }
+                AnimationFrame = KCROUCH;
+                break;
+            case PJUMP:
+                // We only exit jump if something below
+                if ((TileMapWhatIsAt((int)mPosX,(int)mPosY+PLAYER_HEIGHT+2))||(TileMapWhatIsAt((int)mPosX+PLAYER_WIDTH,(int)mPosY+PLAYER_HEIGHT+2))) {
+                    PlayerState = PRUN;
+                }
+                AnimationFrame = KJUMP;
+                break;
 
-        case PDAB:
-            if (inputPos) {
-                PlayerState = PSTOP;
-            }
-            AnimationFrame = KDAB;
-            break;
+            case PDAB:
+                if (inputPos) {
+                    PlayerState = PSTOP;
+                }
+                AnimationFrame = KDAB;
+                break;
+        }
+    } else {
+        AnimationFrame = KDAB;
     }
 
     int height_offset = 8;
     SDL_Rect clip = {64*(int)AnimationFrame,0,PLAYER_TEXTURE_WIDTH,PLAYER_TEXTURE_HEIGHT};
     LTextureRenderEx(pTexture, (int)mPosX-camX-(PLAYER_HEIGHT-PLAYER_WIDTH)/2, (int)mPosY-camY+height_offset, PLAYER_HEIGHT, PLAYER_HEIGHT, &clip, 0.0f, NULL, mVelX > 0 ? SDL_FLIP_NONE : SDL_FLIP_HORIZONTAL);
-}
-
-void PlayerRenderDab(int camX, int camY)
-{
-    int height_offset = 8;
-    SDL_Rect clip = {64*(int)KDAB,0,PLAYER_TEXTURE_WIDTH,PLAYER_TEXTURE_HEIGHT};
-    LTextureRenderEx(pTexture, (int)mPosX-camX-(PLAYER_HEIGHT-PLAYER_WIDTH)/2, (int)mPosY-camY+height_offset, PLAYER_HEIGHT, PLAYER_HEIGHT, &clip, 0.0f, NULL, mVelX > 0 ? SDL_FLIP_NONE : SDL_FLIP_HORIZONTAL);
-
 }
 
 int PlayerGetX(){ return (int)mPosX; }

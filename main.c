@@ -179,9 +179,11 @@ int main( int argc, char* args[] )
                         LevelDrawLevel();
 
                         EditorProcessMovement();
-                        PlayerRenderDab(camera.x, camera.y);
+                        PlayerRender(camera.x, camera.y);
                         break;
                     case GS_PAUSED:
+                        LevelDrawLevel();
+                        PlayerRender(camera.x, camera.y);
                         LMenuDrawMenu();
                         break;
                     case GS_Quit:

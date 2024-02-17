@@ -19,9 +19,17 @@
 #define LEVEL_WIDTH LEVEL_WIDTH_TILES*TILE_WIDTH
 #define LEVEL_HEIGHT LEVEL_HEIGHT_TILES*TILE_HEIGHT
 
+#define TILE_TEXTURE_WIDTH 16
+#define TILE_TEXTURE_HEIGHT 16
+
+#define TILE_TEXTURE_MAP_WIDTH_TILES 32
+#define TILE_TEXTURE_MAP_HEIGHT_TILES 32
+
 #define INDEX(x,y) (LEVEL_WIDTH_TILES * (y) + (x))
 
 void TileMapInit();
+
+struct LTexture *TileMapGetTexture();
 
 uint8_t TileMapWhatIsAt(int x, int y);
 
