@@ -11,14 +11,18 @@
 #include "../main.h"
 
 //The dimensions of the dot
-#define PLAYER_HEIGHT 128
-#define PLAYER_WIDTH 64
+static int PLAYER_HEIGHT = 127;
+#define PLAYER_WIDTH 63
 
 #define PLAYER_TEXTURE_HEIGHT 64
 #define PLAYER_TEXTURE_WIDTH 64
 
 //Maximum axis velocity of the dot
-static const float PLAYER_VELOCITY = 1.5f;
+static const float PLAYER_ACCELERATION = 0.03f;
+
+static const float CROUCH_FACTOR = 0.5f;
+
+static const float PLAYER_VELOCITY = 1.f;
 
 int PlayerGetX();
 

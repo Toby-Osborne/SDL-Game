@@ -76,7 +76,7 @@ void TileMapFillTiles(int x1, int y1, int x2, int y2, int val)
     }
 }
 
-uint8_t TileMapWhatIsAt(int x, int y)
+uint32_t TileMapWhatIsAt(int x, int y)
 {
     return map[INDEX(x / TILE_WIDTH, y / TILE_HEIGHT)];
 }

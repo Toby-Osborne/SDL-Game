@@ -8,8 +8,8 @@
 #include <stdbool.h>
 
 //Screen dimension constants
-static const int SCREEN_WIDTH = 2560;
-static const int SCREEN_HEIGHT = 1440;
+static const int SCREEN_WIDTH = 1920;
+static const int SCREEN_HEIGHT = 1080;
 
 enum GameStates
 {

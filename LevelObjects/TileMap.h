@@ -31,7 +31,7 @@ void TileMapInit();
 
 struct LTexture *TileMapGetTexture();
 
-uint8_t TileMapWhatIsAt(int x, int y);
+uint32_t TileMapWhatIsAt(int x, int y);
 
 void TileMapSetTile(int x, int y, int val);
 

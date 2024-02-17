@@ -9,10 +9,16 @@
 #define INVENTORY_COLUMNS 32
 #define INVENTORY_ROWS 32
 
-#define INVENTORY_BOX_SIZE 32
+#define INVENTORY_BOX_SIZE 24
 #define INVENTORY_BOX_SEPARATION 8
-#define INVENTORY_X_OFFSET 128
-#define INVENTORY_Y_OFFSET 128
+#define INVENTORY_X_OFFSET 32
+#define INVENTORY_Y_OFFSET 32
+
+static int inventoryXOffset = 32;
+static int inventoryYOffset = 32;
+
+static int inventoryBoxSize = 24;
+//static int inventoryBoxSize
 
 extern SDL_Renderer* gRenderer;
 

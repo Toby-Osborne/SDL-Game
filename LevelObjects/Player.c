@@ -14,7 +14,7 @@ float mPosXPlus, mPosYPlus;
 
 float mVelX, mVelY;
 
-const float VEL_DECAY_CONSTANT = 0.8f;
+const float VEL_DECAY_CONSTANT = 0.9f;
 
 SDL_Rect collision_box;
 
@@ -27,6 +27,15 @@ struct LTimer dabTimer;
 struct LTexture *pTexture;
 
 enum GameStates gameMode;
+
+enum PlayerState {
+    PRUN,
+    PSTOP,
+    PDAB,
+    PCROUCH,
+    PJUMP,
+    PHANG
+} PlayerState = PSTOP;
 
 void PlayerRespawn()
 {
@@ -170,9 +179,11 @@ bool PlayerCheckXCollision()
     if (mVelX < 0)
     {
         if (TileMapWhatIsAt((int)(mPosXPlus),(int)mPosY)) return true;
+        if (TileMapWhatIsAt((int)(mPosXPlus), (int)mPosY + (PLAYER_HEIGHT >> 1))) return true;
         if (TileMapWhatIsAt((int)(mPosXPlus), (int)mPosY + PLAYER_HEIGHT)) return true;
     } else {
         if (TileMapWhatIsAt((int)(mPosXPlus) + PLAYER_WIDTH, (int)mPosY)) return true;
+        if (TileMapWhatIsAt((int)(mPosXPlus) + PLAYER_WIDTH, (int)mPosY + (PLAYER_HEIGHT >> 1))) return true;
         if (TileMapWhatIsAt((int)(mPosXPlus) + PLAYER_WIDTH, (int)mPosY + PLAYER_HEIGHT)) return true;
     }
     return false;
@@ -204,25 +215,29 @@ void PlayerProcessMovement()
             break;
         case 1:
             // TODO: check ground collision here
-            if (TileMapWhatIsAt((int)mPosX + PLAYER_WIDTH / 2, (int)mPosY + PLAYER_HEIGHT + 1)) mVelY -= 2.5;
-            if ((int)mPosY + PLAYER_HEIGHT + 1 > LEVEL_HEIGHT) mVelY -= 2.5;
+            if ((TileMapWhatIsAt((int)mPosX, (int)mPosY + PLAYER_HEIGHT + 1))||((TileMapWhatIsAt((int)mPosX + PLAYER_WIDTH, (int)mPosY + PLAYER_HEIGHT + 1)))) mVelY = -2.f;
+            if ((int)mPosY + PLAYER_HEIGHT + 1 > LEVEL_HEIGHT) mVelY = 2.f;
             break;
         case 2:
-            mVelY = PLAYER_VELOCITY;
             break;
     }
-    switch(PlayerController[PLAYER_LEFT] + (PlayerController[PLAYER_RIGHT] << 1))
-    {
-        case 0:
-            mVelX *= VEL_DECAY_CONSTANT;
-            break;
-        case 1:
-            mVelX = -PLAYER_VELOCITY;
-            break;
-        case 2:
-            mVelX = PLAYER_VELOCITY;
-            break;
-    }
+
+        if (PlayerController[PLAYER_LEFT] && !PlayerController[PLAYER_RIGHT] && mVelX < 0.01)
+        {
+            mVelX -= PLAYER_ACCELERATION;
+            if (mVelX <  (PlayerState == PCROUCH ? -CROUCH_FACTOR*PLAYER_VELOCITY:-PLAYER_VELOCITY)) mVelX = (PlayerState == PCROUCH ? -CROUCH_FACTOR*PLAYER_VELOCITY:-PLAYER_VELOCITY);
+        }
+        else if (!PlayerController[PLAYER_LEFT] && PlayerController[PLAYER_RIGHT] && mVelX > -0.01)
+        {
+            mVelX += PLAYER_ACCELERATION;
+            if (mVelX > (PlayerState == PCROUCH ? CROUCH_FACTOR*PLAYER_VELOCITY:PLAYER_VELOCITY)) mVelX = (PlayerState == PCROUCH ? CROUCH_FACTOR*PLAYER_VELOCITY:PLAYER_VELOCITY);
+        }
+        else
+        {
+            mVelX = 0;
+        }
+
+
 
     uint32_t dt = LTimerStopwatch(&playerTimer);
     mVelY += (g*(float)dt);
@@ -323,17 +338,8 @@ enum PlayerSprites {
     KHANG
 } AnimationFrame;
 
-enum PlayerAnimationState {
-    PRUN,
-    PSTOP,
-    PDAB,
-    PCROUCH,
-    PJUMP,
-    PHANG
-} PlayerState = PSTOP;
-
 const int RunFrames = 4;
-const int RunFrameCap = 4*RunFrames;
+const int RunFrameCap = 16*RunFrames;
 int RunFrameCounter;
 
 void PlayerRender(int camX, int camY)
@@ -356,6 +362,7 @@ void PlayerRender(int camX, int camY)
                 }
                 else if (PlayerController[PLAYER_DOWN])
                 {
+                    PLAYER_HEIGHT = 63; mPosY += 64;
                     PlayerState = PCROUCH;
                 }
                 else if (PlayerController[PLAYER_LEFT] || PlayerController[PLAYER_RIGHT])
@@ -371,8 +378,9 @@ void PlayerRender(int camX, int camY)
                 LTimerAction(&dabTimer,TIMER_STOP); // If we didn't break above, then we left STOP state
                 break;
             case PRUN:
-                if (!PlayerController[PLAYER_LEFT] && !PlayerController[PLAYER_RIGHT] && PlayerController[PLAYER_DOWN])
+                if (PlayerController[PLAYER_DOWN])
                 {
+                    PLAYER_HEIGHT = 63; mPosY += 64;
                     PlayerState = PCROUCH;
                 }
                 else if (PlayerController[PLAYER_UP]) {
@@ -391,25 +399,30 @@ void PlayerRender(int camX, int camY)
                 RunFrameCounter = 0;
                 break;
             case PCROUCH:
-                if (PlayerController[PLAYER_LEFT] || PlayerController[PLAYER_RIGHT]) {
-                    PlayerState = PRUN;
-                }
-                else if (!PlayerController[PLAYER_DOWN])
+                if (!PlayerController[PLAYER_DOWN] && !TileMapWhatIsAt((int)mPosX,(int)mPosY-TILE_HEIGHT/2) && !TileMapWhatIsAt((int)mPosX+PLAYER_WIDTH,(int)mPosY-TILE_HEIGHT/2))
                 {
-                    if (!TileMapWhatIsAt((int)mPosX,(int)mPosY+PLAYER_HEIGHT+1))
-                    {
-                        PlayerState = PJUMP;
+                    if (PlayerController[PLAYER_LEFT] || PlayerController[PLAYER_RIGHT]) {
+                        PlayerState = PRUN;
                     }
                     else
                     {
-                        PlayerState = PSTOP;
+                        if (!TileMapWhatIsAt((int)mPosX, (int)mPosY + PLAYER_HEIGHT + 1))
+                        {
+                            PlayerState = PJUMP;
+                        }
+                        else
+                        {
+                            PlayerState = PSTOP;
+                        }
                     }
+                    PLAYER_HEIGHT = 127; mPosY -= 64;
                 }
+
                 AnimationFrame = KCROUCH;
                 break;
             case PJUMP:
                 // We only exit jump if something below
-                if ((TileMapWhatIsAt((int)mPosX,(int)mPosY+PLAYER_HEIGHT+2))||(TileMapWhatIsAt((int)mPosX+PLAYER_WIDTH,(int)mPosY+PLAYER_HEIGHT+2))) {
+                if ((TileMapWhatIsAt((int)mPosX, (int)mPosY + PLAYER_HEIGHT + 2)) || (TileMapWhatIsAt((int)mPosX + PLAYER_WIDTH, (int)mPosY + PLAYER_HEIGHT + 2))) {
                     PlayerState = PRUN;
                 }
                 AnimationFrame = KJUMP;
@@ -428,7 +441,7 @@ void PlayerRender(int camX, int camY)
 
     int height_offset = 8;
     SDL_Rect clip = {64*(int)AnimationFrame,0,PLAYER_TEXTURE_WIDTH,PLAYER_TEXTURE_HEIGHT};
-    LTextureRenderEx(pTexture, (int)mPosX-camX-(PLAYER_HEIGHT-PLAYER_WIDTH)/2, (int)mPosY-camY+height_offset, PLAYER_HEIGHT, PLAYER_HEIGHT, &clip, 0.0f, NULL, mVelX > 0 ? SDL_FLIP_NONE : SDL_FLIP_HORIZONTAL);
+    LTextureRenderEx(pTexture, (int)mPosX-camX-(PLAYER_WIDTH) / 2, (int)mPosY - 64*(PlayerState==PCROUCH) - camY + height_offset, 128, 128, &clip, 0.0f, NULL, PlayerController[PLAYER_RIGHT] > 0 ? SDL_FLIP_NONE : SDL_FLIP_HORIZONTAL);
 }
 
 int PlayerGetX(){ return (int)mPosX; }
