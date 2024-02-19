@@ -11,6 +11,7 @@
 #include "LevelObjects/LCamera.h"
 #include "MenuObjects/LMenu.h"
 #include "LevelObjects/Level.h"
+#include "GameWindow.h"
 
 
 //Starts up SDL and creates window
@@ -18,9 +19,6 @@ bool init();
 
 //Loads media
 bool loadMedia();
-
-//The window we'll be rendering to
-SDL_Window* gWindow = NULL;
 
 //Renderer for textures
 SDL_Renderer* gRenderer = NULL;
@@ -30,6 +28,8 @@ extern SDL_Rect camera;
 enum GameStates gState = GS_MENU;
 
 struct LTexture gTextureCharacter;
+
+
 
 bool init()
 {
@@ -51,8 +51,8 @@ bool init()
     }
 
     //Create window
-    gWindow = SDL_CreateWindow( "Neon Grey", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN );
-    if( gWindow == NULL )
+
+    if(!GameWindowInit())
     {
         printf( "Window could not be created! SDL Error: %s\n", SDL_GetError() );
         success = false;
@@ -60,7 +60,7 @@ bool init()
     else
     {
 
-        gRenderer = SDL_CreateRenderer( gWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+        gRenderer = SDL_CreateRenderer( GameWindowGetWindow(), -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
         if (gRenderer == NULL)
         {
             printf("Renderer could not be created! SDL Error: %s\n", SDL_GetError() );
@@ -109,9 +109,8 @@ void closeGame() {
 
     //Destroy window
     SDL_DestroyRenderer( gRenderer );
-    SDL_DestroyWindow( gWindow );
-    gWindow = NULL;
     gRenderer = NULL;
+    GameWindowFree();
 
     //Quit SDL subsystems
     TTF_Quit();
@@ -143,6 +142,7 @@ int main( int argc, char* args[] )
                     if (e.type == SDL_QUIT) {
                         quit = true;
                     }
+                    GameWindowHandleEvent(&e);
                     switch (gState)
                     {
                         case GS_MENU:

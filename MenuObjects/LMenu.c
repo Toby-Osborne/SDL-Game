@@ -8,6 +8,7 @@
 #include "../LevelObjects/Level.h"
 #include "../LevelObjects/Player.h"
 #include "Inventory.h"
+#include "../GameWindow.h"
 
 FC_Font* gFCFont;
 
@@ -55,13 +56,13 @@ void LMenuInitMenu()
     FC_LoadFont(gFCFont, gRenderer, "GameResources/Fonts/lazy.ttf", 25, FC_MakeColor(0,0,0,255), TTF_STYLE_NORMAL);
 
     // Init Main Menu Objects
-    SDL_Rect startButtonLocation = {(SCREEN_WIDTH-400)/2,(SCREEN_HEIGHT-80)/2-50,400,80};
+    SDL_Rect startButtonLocation = {(GameWindowGetWindowWidth()-400)/2,(GameWindowGetWindowHeight()-80)/2-50,400,80};
     LButtonInitButton(&MainMenu.startButton, startButtonLocation, "Begin the Game", gFCFont);
 
-    SDL_Rect levelEditButtonLocation = {(SCREEN_WIDTH-400)/2,(SCREEN_HEIGHT-80)/2+50,400,80};
+    SDL_Rect levelEditButtonLocation = {(GameWindowGetWindowWidth()-400)/2,(GameWindowGetWindowHeight()-80)/2+50,400,80};
     LButtonInitButton(&MainMenu.editLevelButton, levelEditButtonLocation, "Edit the Level", gFCFont);
 
-    SDL_Rect quitButtonLocation = {(SCREEN_WIDTH-400)/2,(SCREEN_HEIGHT-80)/2+150,400,80};
+    SDL_Rect quitButtonLocation = {(GameWindowGetWindowWidth()-400)/2,(GameWindowGetWindowHeight()-80)/2+150,400,80};
     LButtonInitButton(&MainMenu.quitButton, quitButtonLocation, "Quit the Game", gFCFont);
 
     // Init Pause Menu Objects

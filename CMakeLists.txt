@@ -25,6 +25,8 @@ add_executable(SDL2Test main.c main.h
         LevelObjects/Level.h
         MenuObjects/Inventory.c
         MenuObjects/Inventory.h
+        GameWindow.c
+        GameWindow.h
 )
 
 if(WIN32)

@@ -36,8 +36,8 @@ void LevelSaveLevel()
 void LevelDrawLevel()
 {
     // The textures repeat every 512 pixels, so just snap back there
-    SDL_Rect background_render = {camera.x%512, camera.y%512, camera.w, camera.h};
-    LTextureRender(&gTextureBackground,0,0,background_render.w, background_render.h, &background_render);
+    SDL_Rect background_render = {(camera.x/4)%512, (camera.y/4)%512, camera.w/4, camera.h/4};
+    LTextureRender(&gTextureBackground,0,0,camera.w, camera.h, &background_render);
     TileMapRenderTiles();
 }
 

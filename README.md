@@ -29,6 +29,8 @@ It will now just work
  - Options menu
    - Resolution
    - GUI Scale
+ - Resizable windows
+ - Use Viewport to implement batch rendering of tile map
  - Jump height varies with how long you press UP
  - CTRL-Z for map edit, block-pick key
  - Rework physics engine to work with signed integers and bit shift them by 1024 on exit.

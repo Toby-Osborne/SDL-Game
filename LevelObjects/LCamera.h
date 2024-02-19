@@ -9,6 +9,8 @@
 
 void LCameraProcessMovement();
 
+void LCameraInitCamera();
+
 SDL_Rect *LCameraGetCamera();
 
 #endif //SDLGAME_LCAMERA_H

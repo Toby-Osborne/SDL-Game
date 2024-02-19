@@ -5,17 +5,24 @@
 #include "LCamera.h"
 #include "Player.h"
 #include "TileMap.h"
+#include "../GameWindow.h"
 
-SDL_Rect camera = {0,0,SCREEN_WIDTH,SCREEN_HEIGHT};
+SDL_Rect camera = {0,0,0,0};
+
+void LCameraInitCamera()
+{
+    camera.w = GameWindowGetWindowWidth();
+    camera.h = GameWindowGetWindowHeight();
+}
 
 void LCameraProcessMovement()
 {
-    camera.x = (PlayerGetX() + PLAYER_WIDTH / 2 ) - SCREEN_WIDTH / 2;
-    camera.y = (PlayerGetY() + PLAYER_HEIGHT / 2 ) - SCREEN_HEIGHT / 2;
+    camera.x = (PlayerGetX() + PLAYER_WIDTH / 2 ) - camera.w / 2;
+    camera.y = (PlayerGetY() + PLAYER_HEIGHT / 2 ) - GameWindowGetWindowHeight() / 2;
 
     //Center the camera over the dot
-    camera.x = (PlayerGetX() + PLAYER_WIDTH / 2 ) - SCREEN_WIDTH / 2;
-    camera.y = (PlayerGetY() + PLAYER_HEIGHT / 2 ) - SCREEN_HEIGHT / 2;
+    camera.x = (PlayerGetX() + PLAYER_WIDTH / 2 ) - camera.h / 2;
+    camera.y = (PlayerGetY() + PLAYER_HEIGHT / 2 ) - GameWindowGetWindowHeight() / 2;
 
     //Keep the camera in bounds
     if( camera.x < 0 )

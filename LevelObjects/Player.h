@@ -18,7 +18,7 @@ static int PLAYER_HEIGHT = 127;
 #define PLAYER_TEXTURE_WIDTH 64
 
 //Maximum axis velocity of the dot
-static const float PLAYER_ACCELERATION = 0.03f;
+static const float PLAYER_ACCELERATION = 0.1f;
 
 static const float CROUCH_FACTOR = 0.5f;
 
