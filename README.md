@@ -23,6 +23,7 @@ It will now just work
 ## TODO:
 ### Bugs:
  - Cannot select first tile in level edit
+ - Tile-mapTiles is drawn with 500 GPU calls, not scalable to multiple layers or viewports
 
 ### Features:
  - HUD for inventory
@@ -30,7 +31,7 @@ It will now just work
    - Resolution
    - GUI Scale
  - Resizable windows
- - Use Viewport to implement batch rendering of tile map
+ - Use Viewport to implement batch rendering of tile mapTiles
  - Jump height varies with how long you press UP
- - CTRL-Z for map edit, block-pick key
+ - CTRL-Z for mapTiles edit, block-pick key
  - Rework physics engine to work with signed integers and bit shift them by 1024 on exit.

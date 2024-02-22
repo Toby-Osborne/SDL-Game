@@ -79,7 +79,7 @@ void LTextureFree(struct LTexture *texture)
 
 void LTextureRender(struct LTexture *texture, int x, int y, int w, int h,SDL_Rect* clip)
 {
-    // Here we create an arbitrary quad and map the texture onto it
+    // Here we create an arbitrary quad and mapTiles the texture onto it
     SDL_Rect renderQuad = {x, y, w, h};
     SDL_RenderCopy(gRenderer, texture->mTexture, clip, &renderQuad);
 }

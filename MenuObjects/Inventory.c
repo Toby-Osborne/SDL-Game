@@ -35,7 +35,7 @@ void inventoryUpdateSlotWithItem(int xSlot, int ySlot, int itemID)
     inventoryItems[INV_INDEX(xSlot,ySlot)].id = itemID;
 
     // Our system assumes that the item ids are the same as the tile ids, therefore
-    // the item texture map should be identical to the tile texture map
+    // the item texture mapTiles should be identical to the tile texture mapTiles
 
     int tileTextureX = itemID % TILE_TEXTURE_MAP_WIDTH_TILES;
     int tileTextureY = itemID / TILE_TEXTURE_MAP_WIDTH_TILES;

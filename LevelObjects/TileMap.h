@@ -43,4 +43,6 @@ void TileMapLoadTileMap(char* path);
 
 void TileMapSaveTileMap(char* path);
 
+void TileMapFree();
+
 #endif //SDLGAME_TILEMAP_H

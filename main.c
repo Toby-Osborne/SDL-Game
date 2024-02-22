@@ -106,6 +106,7 @@ void closeGame() {
     FreeTextures();
 
     LMenuFreeMenus();
+    LevelFree();
 
     //Destroy window
     SDL_DestroyRenderer( gRenderer );

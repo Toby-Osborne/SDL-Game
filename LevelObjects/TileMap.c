@@ -8,12 +8,21 @@ extern SDL_Rect camera;
 
 SDL_Rect tileClip = {0, 0, TILE_TEXTURE_WIDTH, TILE_TEXTURE_HEIGHT};
 
-uint32_t map[LEVEL_WIDTH_TILES*LEVEL_HEIGHT_TILES] = {0};
+uint32_t *mapTiles;
+
+struct MapHeader {
+    int LevelWidthTiles;
+    int LevelHeightTiles;
+    int LevelNumEntities;
+} MapHeader;
 
 struct LTexture gTextureTile;
 
 void TileMapInit()
 {
+    MapHeader.LevelHeightTiles = LEVEL_HEIGHT_TILES;
+    MapHeader.LevelWidthTiles = LEVEL_WIDTH_TILES;
+    MapHeader.LevelNumEntities = 0;
     LTextureInit(&gTextureTile);
     LTextureLoadFromFile(&gTextureTile, "GameResources/Textures-16.png");
 }
@@ -27,11 +36,16 @@ void TileMapLoadTileMap(char* path)
         printf("%s does not exist, cannot load tilemap", path);
         return;
     }
-    for (int i = 0;i<LEVEL_WIDTH_TILES*LEVEL_HEIGHT_TILES;i++)
-    {
-        SDL_RWread( file, &map[i], sizeof(map[0]), 1);
-    }
+    SDL_RWread(file,&MapHeader,sizeof(MapHeader),1);
+    free(mapTiles);
+    mapTiles = malloc(sizeof(*mapTiles)*MapHeader.LevelWidthTiles*MapHeader.LevelHeightTiles);
+    SDL_RWread(file, mapTiles, sizeof(mapTiles[0]), LEVEL_WIDTH_TILES * LEVEL_HEIGHT_TILES);
     SDL_RWclose(file);
+}
+
+void TileMapFree()
+{
+    free(mapTiles);
 }
 
 struct LTexture *TileMapGetTexture()
@@ -47,17 +61,22 @@ void TileMapSaveTileMap(char* path)
     {
         printf("%s does not exist, creating tilemap", path);
     }
-    for (int i = 0;i<LEVEL_WIDTH_TILES*LEVEL_HEIGHT_TILES;i++)
-    {
-        SDL_RWwrite(file, &map[i], sizeof(map[0]), 1);
-    }
+    // First, we write the mapTiles header
+    SDL_RWwrite(file, &MapHeader, sizeof(MapHeader),1);
+
+    // Second, write the tile layer of the mapTiles
+    SDL_RWwrite(file, mapTiles, sizeof(mapTiles[0]), LEVEL_WIDTH * LEVEL_HEIGHT);
+
+    // Third, write the background layer of the mapTiles
+
+    // Fourth, write entities
 
     SDL_RWclose(file);
 }
 
 void TileMapSetTile(int x, int y, int val)
 {
-    map[INDEX(x / TILE_WIDTH, y / TILE_HEIGHT)] = val;
+    mapTiles[INDEX(x / TILE_WIDTH, y / TILE_HEIGHT)] = val;
 }
 
 void TileMapFillTiles(int x1, int y1, int x2, int y2, int val)
@@ -71,14 +90,14 @@ void TileMapFillTiles(int x1, int y1, int x2, int y2, int val)
     for (int xTile = x1/TILE_WIDTH; xTile <= x2/TILE_WIDTH; xTile++){
         for (int yTile = y1/TILE_HEIGHT; yTile <= y2/TILE_HEIGHT; yTile++)
         {
-            map[INDEX(xTile,yTile)] = val;
+            mapTiles[INDEX(xTile, yTile)] = val;
         }
     }
 }
 
 uint32_t TileMapWhatIsAt(int x, int y)
 {
-    return map[INDEX(x / TILE_WIDTH, y / TILE_HEIGHT)];
+    return mapTiles[INDEX(x / TILE_WIDTH, y / TILE_HEIGHT)];
 }
 
 int fastTileClamp(int tile, int clamp) {
@@ -90,10 +109,10 @@ void TileMapRenderTiles()
 {
     for (int x_tile = camera.x/TILE_WIDTH;x_tile < fastTileClamp((camera.x+camera.w)/TILE_WIDTH+1,LEVEL_WIDTH_TILES);x_tile++) {
         for (int y_tile = camera.y/TILE_WIDTH;y_tile < fastTileClamp((camera.y+camera.h)/TILE_WIDTH+1,LEVEL_HEIGHT_TILES );y_tile++) {
-            if (!map[INDEX(x_tile,y_tile)]) continue;
+            if (!mapTiles[INDEX(x_tile, y_tile)]) continue;
             // TODO: Maybe bake a lookup table for this for speed?
-            tileClip.x = TILE_TEXTURE_WIDTH * (map[INDEX(x_tile,y_tile)]%TILE_TEXTURE_MAP_WIDTH_TILES);
-            tileClip.y = TILE_TEXTURE_WIDTH * (map[INDEX(x_tile,y_tile)]/TILE_TEXTURE_MAP_WIDTH_TILES);
+            tileClip.x = TILE_TEXTURE_WIDTH * (mapTiles[INDEX(x_tile, y_tile)] % TILE_TEXTURE_MAP_WIDTH_TILES);
+            tileClip.y = TILE_TEXTURE_WIDTH * (mapTiles[INDEX(x_tile, y_tile)] / TILE_TEXTURE_MAP_WIDTH_TILES);
             LTextureRender(&gTextureTile,x_tile*TILE_WIDTH-camera.x,y_tile*TILE_HEIGHT-camera.y,TILE_WIDTH,TILE_HEIGHT,&tileClip);
         }
     }

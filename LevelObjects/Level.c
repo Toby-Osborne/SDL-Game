@@ -43,5 +43,5 @@ void LevelDrawLevel()
 
 void LevelFree()
 {
-
+    TileMapFree();
 }
