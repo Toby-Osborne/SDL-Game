@@ -19,6 +19,7 @@ static int PLAYER_HEIGHT = 127;
 
 //Maximum axis velocity of the dot
 static const float PLAYER_ACCELERATION = 0.1f;
+static const float PLAYER_JUMP_ANTIGRAVITY = 0.07f;
 
 static const float CROUCH_FACTOR = 0.5f;
 

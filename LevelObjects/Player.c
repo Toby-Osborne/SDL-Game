@@ -215,8 +215,16 @@ void PlayerProcessMovement()
             break;
         case 1:
             // TODO: check ground collision here
-            if ((TileMapWhatIsAt((int)mPosX, (int)mPosY + PLAYER_HEIGHT + 1))||((TileMapWhatIsAt((int)mPosX + PLAYER_WIDTH, (int)mPosY + PLAYER_HEIGHT + 1)))) mVelY = -2.f;
-            if ((int)mPosY + PLAYER_HEIGHT + 1 > LEVEL_HEIGHT) mVelY = 2.f;
+
+            if ((TileMapWhatIsAt((int)mPosX, (int)mPosY + PLAYER_HEIGHT + 1))||((TileMapWhatIsAt((int)mPosX + PLAYER_WIDTH, (int)mPosY + PLAYER_HEIGHT + 1))))
+            {
+                mVelY = -1.5f;
+            }
+            else
+            {
+                mVelY -= PLAYER_JUMP_ANTIGRAVITY;
+            }
+            if ((int)mPosY + PLAYER_HEIGHT + 1 > LEVEL_HEIGHT) mVelY = 0;
             break;
         case 2:
             break;
