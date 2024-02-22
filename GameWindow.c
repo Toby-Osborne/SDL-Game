@@ -91,7 +91,7 @@ void GameWindowHandleEvent(SDL_Event *e)
         }
         else
         {
-            SDL_SetWindowFullscreen(WindowStruct.mWindow,SDL_WINDOW_FULLSCREEN);
+            SDL_SetWindowFullscreen(WindowStruct.mWindow,SDL_WINDOW_FULLSCREEN_DESKTOP);
             WindowStruct.mFullScreen = true;
             WindowStruct.mMinimized = false;
         }
