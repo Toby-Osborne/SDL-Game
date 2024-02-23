@@ -8,8 +8,10 @@
 #include <stdbool.h>
 #include <SDL.h>
 
-bool checkCollision (SDL_Rect a, SDL_Rect b);
+static const float g = 0.0002f;
 
-static const float g = 0.008f;
+typedef struct {
+    float x, y, w, h;
+} SDLP_FloatRect ;
 
 #endif //SDLGAME_PHYSICS_H

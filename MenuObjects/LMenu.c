@@ -84,13 +84,13 @@ enum GameStates LMenuHandleInput(SDL_Event *e)
                 LevelLoadLevel("Levels/level-1.tm");
                 PlayerUnpause();
                 PlayerSetGameMode(GS_LEVEL);
-                PlayerRespawn();
+                PlayerRespawn(0, 0);
                 return GS_LEVEL;
             }
             if (LButtonProcessButton(&MainMenu.editLevelButton, e)) {
                 LevelLoadLevel("Levels/level-1.tm");
                 PlayerSetGameMode(GS_LEVEL_EDIT);
-                PlayerRespawn();
+                PlayerRespawn(0, 0);
                 return GS_LEVEL_EDIT;
             }
             if (LButtonProcessButton(&MainMenu.quitButton, e)) return GS_Quit;

@@ -6,23 +6,22 @@
 #include "Player.h"
 #include "TileMap.h"
 #include "../GameWindow.h"
+#include "physics.h"
 
-SDL_Rect camera = {0,0,0,0};
+// All values normalized to tile width
+SDLP_FloatRect camera;
 
 void LCameraInitCamera()
 {
-    camera.w = GameWindowGetWindowWidth();
-    camera.h = GameWindowGetWindowHeight();
+    camera.w = ((float)GameWindowGetWindowWidth())/((float)TileMapGetTileWidth());
+    camera.h = ((float)GameWindowGetWindowHeight())/((float)TileMapGetTileHeight());
 }
 
 void LCameraProcessMovement()
 {
-    camera.x = (PlayerGetX() + PLAYER_WIDTH / 2 ) - camera.w / 2;
-    camera.y = (PlayerGetY() + PLAYER_HEIGHT / 2 ) - GameWindowGetWindowHeight() / 2;
-
     //Center the camera over the dot
-    camera.x = (PlayerGetX() + PLAYER_WIDTH / 2 ) - camera.h / 2;
-    camera.y = (PlayerGetY() + PLAYER_HEIGHT / 2 ) - GameWindowGetWindowHeight() / 2;
+    camera.x = (PlayerGetX() + PlayerGetW() / 2 ) - camera.w / 2;
+    camera.y = (PlayerGetY() + PlayerGetH() / 2 ) - camera.h / 2;
 
     //Keep the camera in bounds
     if( camera.x < 0 )
@@ -33,17 +32,12 @@ void LCameraProcessMovement()
     {
         camera.y = 0;
     }
-    if( camera.x > LEVEL_WIDTH - camera.w )
+    if( camera.x > TileMapGetWidth() - camera.w )
     {
-        camera.x = LEVEL_WIDTH - camera.w;
+        camera.x = TileMapGetWidth() - camera.w;
     }
-    if( camera.y > LEVEL_HEIGHT - camera.h )
+    if( camera.y > TileMapGetHeight() - camera.h )
     {
-        camera.y = LEVEL_HEIGHT - camera.h;
+        camera.y = TileMapGetHeight() - camera.h;
     }
-}
-
-SDL_Rect *LCameraGetCamera()
-{
-    return &camera;
 }

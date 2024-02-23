@@ -8,17 +8,9 @@
 #include "LCamera.h"
 #include "TileMap.h"
 #include "../MenuObjects/LMenu.h"
-float mPosX, mPosY;
-
-float mPosXPlus, mPosYPlus;
-
-float mVelX, mVelY;
-
 const float VEL_DECAY_CONSTANT = 0.9f;
 
-SDL_Rect collision_box;
-
-extern SDL_Rect camera;
+extern SDLP_FloatRect camera;
 
 struct LTimer playerTimer;
 
@@ -37,13 +29,23 @@ enum PlayerState {
     PHANG
 } PlayerState = PSTOP;
 
-void PlayerRespawn()
+struct Player {
+    enum PlayerState playerState;
+    float mPosX, mPosY;
+    float mPosXPlus, mPosYPlus;
+    float mVelX, mVelY;
+    float playerWidth, playerHeight;
+} Player;
+
+void PlayerRespawn(float x, float y)
 {
     LTimerStopwatch(&playerTimer);
-    mPosX = 0;
-    mPosY = 0;
-    mVelX = 0;
-    mVelY = 0;
+    Player.mPosX = x;
+    Player.mPosY = y;
+    Player.mVelX = 0;
+    Player.mVelY = 0;
+    Player.playerWidth = DEFAULT_PLAYER_WIDTH;
+    Player.playerHeight = DEFAULT_PLAYER_HEIGHT;
 }
 
 void PlayerPause() {
@@ -73,10 +75,6 @@ void PlayerInit(struct LTexture *texture)
     LTimerInit(&dabTimer);
 
     pTexture = texture;
-    collision_box.x = (int)mPosX;
-    collision_box.y = (int)mPosY;
-    collision_box.w = PLAYER_WIDTH;
-    collision_box.h = PLAYER_HEIGHT;
 
     PlayerPause();
 }
@@ -176,15 +174,15 @@ enum GameStates PlayerHandleInput(SDL_Event *e)
 bool PlayerCheckXCollision()
 {
     // Use mPosXPlus
-    if (mVelX < 0)
+    if (Player.mVelX < 0)
     {
-        if (TileMapWhatIsAt((int)(mPosXPlus),(int)mPosY)) return true;
-        if (TileMapWhatIsAt((int)(mPosXPlus), (int)mPosY + (PLAYER_HEIGHT >> 1))) return true;
-        if (TileMapWhatIsAt((int)(mPosXPlus), (int)mPosY + PLAYER_HEIGHT)) return true;
+        if (TileMapWhatIsAt((int)(Player.mPosXPlus),(int)(Player.mPosY))) return true;
+        if (TileMapWhatIsAt((int)(Player.mPosXPlus), (int)((Player.mPosY) + (0.5f*(Player.playerHeight))))) return true;
+        if (TileMapWhatIsAt((int)(Player.mPosXPlus), (int)((Player.mPosY) + Player.playerHeight))) return true;
     } else {
-        if (TileMapWhatIsAt((int)(mPosXPlus) + PLAYER_WIDTH, (int)mPosY)) return true;
-        if (TileMapWhatIsAt((int)(mPosXPlus) + PLAYER_WIDTH, (int)mPosY + (PLAYER_HEIGHT >> 1))) return true;
-        if (TileMapWhatIsAt((int)(mPosXPlus) + PLAYER_WIDTH, (int)mPosY + PLAYER_HEIGHT)) return true;
+        if (TileMapWhatIsAt((int)(Player.mPosXPlus + Player.playerWidth), (int)(Player.mPosY))) return true;
+        if (TileMapWhatIsAt((int)(Player.mPosXPlus + Player.playerWidth), (int)(Player.mPosY + (0.5*Player.playerHeight)))) return true;
+        if (TileMapWhatIsAt((int)(Player.mPosXPlus + Player.playerWidth), (int)(Player.mPosY + Player.playerHeight))) return true;
     }
     return false;
 }
@@ -193,13 +191,13 @@ bool PlayerCheckXCollision()
 bool PlayerCheckYCollision()
 {
     // Use mPosXPlus
-    if (mVelY < 0)
+    if (Player.mVelY < 0)
     {
-        if (TileMapWhatIsAt((int)mPosX,(int)mPosYPlus)) return true;
-        if (TileMapWhatIsAt((int)mPosX + PLAYER_WIDTH, (int)mPosYPlus)) return true;
+        if (TileMapWhatIsAt((int)(Player.mPosX),(int)Player.mPosYPlus)) return true;
+        if (TileMapWhatIsAt((int)(Player.mPosX + Player.playerWidth), (int)Player.mPosYPlus)) return true;
     } else {
-        if (TileMapWhatIsAt((int)mPosX, (int)mPosYPlus + PLAYER_HEIGHT)) return true;
-        if (TileMapWhatIsAt((int)mPosX + PLAYER_WIDTH, (int)mPosYPlus + PLAYER_HEIGHT)) return true;
+        if (TileMapWhatIsAt((int)(Player.mPosX), (int)(Player.mPosYPlus + Player.playerHeight))) return true;
+        if (TileMapWhatIsAt((int)(Player.mPosX + Player.playerWidth), (int)(Player.mPosYPlus + Player.playerHeight))) return true;
     }
     return false;
 }
@@ -216,95 +214,95 @@ void PlayerProcessMovement()
         case 1:
             // TODO: check ground collision here
 
-            if ((TileMapWhatIsAt((int)mPosX, (int)mPosY + PLAYER_HEIGHT + 1))||((TileMapWhatIsAt((int)mPosX + PLAYER_WIDTH, (int)mPosY + PLAYER_HEIGHT + 1))))
+            if ((TileMapWhatIsAt(Player.mPosX, Player.mPosY + Player.playerHeight+0.1f))||((TileMapWhatIsAt(Player.mPosX + Player.playerWidth, Player.mPosY + Player.playerHeight + 0.1f))))
             {
-                mVelY = -1.5f;
+                Player.mVelY = -PLAYER_JUMP_VELOCITY;
             }
             else
             {
-                mVelY -= PLAYER_JUMP_ANTIGRAVITY;
+                Player.mVelY -= PLAYER_JUMP_ANTIGRAVITY;
             }
-            if ((int)mPosY + PLAYER_HEIGHT + 1 > LEVEL_HEIGHT) mVelY = 0;
+            if (Player.mPosY + Player.playerHeight + 1 > TileMapGetHeight()) Player.mVelY = 0;
             break;
         case 2:
             break;
     }
 
-        if (PlayerController[PLAYER_LEFT] && !PlayerController[PLAYER_RIGHT] && mVelX < 0.01)
+        if (PlayerController[PLAYER_LEFT] && !PlayerController[PLAYER_RIGHT] && Player.mVelX < 0.01)
         {
-            mVelX -= PLAYER_ACCELERATION;
-            if (mVelX <  (PlayerState == PCROUCH ? -CROUCH_FACTOR*PLAYER_VELOCITY:-PLAYER_VELOCITY)) mVelX = (PlayerState == PCROUCH ? -CROUCH_FACTOR*PLAYER_VELOCITY:-PLAYER_VELOCITY);
+            Player.mVelX -= PLAYER_ACCELERATION;
+            if (Player.mVelX <  (PlayerState == PCROUCH ? -CROUCH_FACTOR*PLAYER_VELOCITY:-PLAYER_VELOCITY)) Player.mVelX = (PlayerState == PCROUCH ? -CROUCH_FACTOR*PLAYER_VELOCITY:-PLAYER_VELOCITY);
         }
-        else if (!PlayerController[PLAYER_LEFT] && PlayerController[PLAYER_RIGHT] && mVelX > -0.01)
+        else if (!PlayerController[PLAYER_LEFT] && PlayerController[PLAYER_RIGHT] && Player.mVelX > -0.01)
         {
-            mVelX += PLAYER_ACCELERATION;
-            if (mVelX > (PlayerState == PCROUCH ? CROUCH_FACTOR*PLAYER_VELOCITY:PLAYER_VELOCITY)) mVelX = (PlayerState == PCROUCH ? CROUCH_FACTOR*PLAYER_VELOCITY:PLAYER_VELOCITY);
+            Player.mVelX += PLAYER_ACCELERATION;
+            if (Player.mVelX > (PlayerState == PCROUCH ? CROUCH_FACTOR*PLAYER_VELOCITY:PLAYER_VELOCITY)) Player.mVelX = (PlayerState == PCROUCH ? CROUCH_FACTOR*PLAYER_VELOCITY:PLAYER_VELOCITY);
         }
         else
         {
-            mVelX = 0;
+            Player.mVelX = 0;
         }
 
 
-
     uint32_t dt = LTimerStopwatch(&playerTimer);
-    mVelY += (g*(float)dt);
-    mPosXPlus = mPosX + (float)dt*mVelX;
-    mPosYPlus = mPosY + (float)dt*mVelY;
+    Player.mVelY += (g*(float)dt);
 
-    if (mVelY > terminal_velocity) mVelY = terminal_velocity;
+    Player.mPosXPlus = Player.mPosX + (float)dt*Player.mVelX;
+    Player.mPosYPlus = Player.mPosY + (float)dt*Player.mVelY;
+
+    if (Player.mVelY > terminal_velocity) Player.mVelY = terminal_velocity;
 
     //If the dot went too far to the left or right
-    if (mPosXPlus < 0) {
-        mVelX = 0;
-        mPosX = 0;
-    } else if ((int)mPosXPlus + PLAYER_WIDTH > LEVEL_WIDTH )
+    if (Player.mPosXPlus < 0) {
+        Player.mVelX = 0;
+        Player.mPosX = 0;
+    } else if ((int)Player.mPosXPlus + Player.playerWidth > TileMapGetWidth())
     {
-        mVelX = 0;
-        mPosX = LEVEL_WIDTH - PLAYER_WIDTH - 1;
+        Player.mVelX = 0;
+        Player.mPosX = TileMapGetWidth() - Player.playerWidth - 1;
     }
     else if(PlayerCheckXCollision())
     {
         // Clip to nearest tile if not already
-        if (mVelX < 0) {
-            mPosX = (float)(TILE_WIDTH*((int)mPosX/TILE_WIDTH));
+        if (Player.mVelX < 0) {
+            Player.mPosX = (float)(((int)Player.mPosX));
         } else {
-            mPosX = (float)(TILE_WIDTH*(((int)mPosX + PLAYER_WIDTH) / TILE_WIDTH + 1) - PLAYER_WIDTH - 1);
+            Player.mPosX = (float)((int)(Player.mPosX + Player.playerWidth))+0.99-Player.playerWidth;
         }
-        mVelX = 0;
+        Player.mVelX = 0;
     }
     else
     {
-        mPosX = mPosXPlus;
+        Player.mPosX = Player.mPosXPlus;
     }
-    if(mPosYPlus < 0) {
-        mVelY = 0;
-        mPosY = 0;
-    } else if ((int)mPosYPlus + PLAYER_HEIGHT > LEVEL_HEIGHT) {
-        mVelY = 0;
-        mPosY = LEVEL_HEIGHT - PLAYER_HEIGHT - 1;
+    if(Player.mPosYPlus < 0) {
+        Player.mVelY = 0;
+        Player.mPosY = 0;
+    } else if ((int)Player.mPosYPlus + Player.playerHeight > TileMapGetHeight()) {
+        Player.mVelY = 0;
+        Player.mPosY = TileMapGetHeight() - Player.playerHeight;
     } else if (PlayerCheckYCollision())
     {
         // Clip to nearest tile if not already
-        if (mVelY < 0) {
-            mPosY = (float)(TILE_HEIGHT*((int)mPosY/TILE_HEIGHT));
+        if (Player.mVelY < 0) {
+            Player.mPosY = (float)((int)Player.mPosY);
         } else {
-            mPosY = (float)(TILE_HEIGHT*((((int)mPosY + PLAYER_HEIGHT) / TILE_HEIGHT) + 1) - PLAYER_HEIGHT - 1);
+            Player.mPosY = (float)((int)(Player.mPosY + Player.playerHeight))+0.99-Player.playerHeight;
         }
-        mVelY = 0;
+        Player.mVelY = 0;
     }
     else {
-        mPosY = mPosYPlus;
+        Player.mPosY = Player.mPosYPlus;
     }
 
-    if (mVelX != 0) {
-        playerDistX += (int)(5.f*mVelX);
+    if (Player.mVelX != 0) {
+        playerDistX += (int)(5.f*Player.mVelX);
     }
-    collision_box.x = (int)mPosX;
-    collision_box.y = (int)mPosY;
-
+//    printf("xVel: %.2f     yVel: %.2f     mPosX: %.2f    mPosY: %.2f\n",Player.mVelX,Player.mVelY,Player.mPosX,Player.mPosY);
     LCameraProcessMovement();
 }
+
+float editorMoveSpeed = 0.5f;
 
 void EditorProcessMovement()
 {
@@ -313,18 +311,18 @@ void EditorProcessMovement()
     switch (horizontalMoveConst)
     {
         case 1:
-            if ((int)mPosX - TILE_WIDTH > 0) mPosX -= TILE_WIDTH; break;
+            if (Player.mPosX - editorMoveSpeed > 0) Player.mPosX -= editorMoveSpeed; break;
         case 2:
-            if ((int)mPosX + TILE_WIDTH < LEVEL_WIDTH) mPosX += TILE_WIDTH; break;
+            if (Player.mPosX + editorMoveSpeed < TileMapGetWidth()) Player.mPosX += editorMoveSpeed; break;
         default:
             break;
     }
     switch (verticalMoveConst)
     {
         case 1:
-            if ((int)mPosY - TILE_HEIGHT > 0) mPosY -= TILE_HEIGHT; break;
+            if (Player.mPosY - editorMoveSpeed > 0) Player.mPosY -= editorMoveSpeed; break;
         case 2:
-            if ((int)mPosY + TILE_HEIGHT < LEVEL_HEIGHT) mPosY += TILE_HEIGHT; break;
+            if (Player.mPosY + editorMoveSpeed < TileMapGetHeight()) Player.mPosY += editorMoveSpeed; break;
         default:
             break;
     }
@@ -370,7 +368,7 @@ void PlayerRender(int camX, int camY)
                 }
                 else if (PlayerController[PLAYER_DOWN])
                 {
-                    PLAYER_HEIGHT = 63; mPosY += 64;
+                    Player.playerHeight = 1.f; Player.mPosY += 1.f;
                     PlayerState = PCROUCH;
                 }
                 else if (PlayerController[PLAYER_LEFT] || PlayerController[PLAYER_RIGHT])
@@ -388,7 +386,7 @@ void PlayerRender(int camX, int camY)
             case PRUN:
                 if (PlayerController[PLAYER_DOWN])
                 {
-                    PLAYER_HEIGHT = 63; mPosY += 64;
+                    Player.playerHeight = 1.f; Player.mPosY += 1.f;
                     PlayerState = PCROUCH;
                 }
                 else if (PlayerController[PLAYER_UP]) {
@@ -407,14 +405,14 @@ void PlayerRender(int camX, int camY)
                 RunFrameCounter = 0;
                 break;
             case PCROUCH:
-                if (!PlayerController[PLAYER_DOWN] && !TileMapWhatIsAt((int)mPosX,(int)mPosY-TILE_HEIGHT/2) && !TileMapWhatIsAt((int)mPosX+PLAYER_WIDTH,(int)mPosY-TILE_HEIGHT/2))
+                if (!PlayerController[PLAYER_DOWN] && !TileMapWhatIsAt(Player.mPosX,Player.mPosY-0.5f) && !TileMapWhatIsAt(Player.mPosX+Player.playerWidth,(Player.mPosY-0.5f)))
                 {
                     if (PlayerController[PLAYER_LEFT] || PlayerController[PLAYER_RIGHT]) {
                         PlayerState = PRUN;
                     }
                     else
                     {
-                        if (!TileMapWhatIsAt((int)mPosX, (int)mPosY + PLAYER_HEIGHT + 1))
+                        if (!TileMapWhatIsAt(Player.mPosX, Player.mPosY + Player.playerHeight))
                         {
                             PlayerState = PJUMP;
                         }
@@ -423,14 +421,14 @@ void PlayerRender(int camX, int camY)
                             PlayerState = PSTOP;
                         }
                     }
-                    PLAYER_HEIGHT = 127; mPosY -= 64;
+                    Player.playerHeight = 2.f; Player.mPosY -= 1.f;
                 }
 
                 AnimationFrame = KCROUCH;
                 break;
             case PJUMP:
                 // We only exit jump if something below
-                if ((TileMapWhatIsAt((int)mPosX, (int)mPosY + PLAYER_HEIGHT + 2)) || (TileMapWhatIsAt((int)mPosX + PLAYER_WIDTH, (int)mPosY + PLAYER_HEIGHT + 2))) {
+                if ((TileMapWhatIsAt(Player.mPosX, Player.mPosY + Player.playerHeight + 0.1f)) || (TileMapWhatIsAt(Player.mPosX + Player.playerWidth, Player.mPosY + Player.playerHeight+0.1f))) {
                     PlayerState = PRUN;
                 }
                 AnimationFrame = KJUMP;
@@ -447,11 +445,14 @@ void PlayerRender(int camX, int camY)
         AnimationFrame = KDAB;
     }
 
-    int height_offset = 8;
     SDL_Rect clip = {64*(int)AnimationFrame,0,PLAYER_TEXTURE_WIDTH,PLAYER_TEXTURE_HEIGHT};
-    LTextureRenderEx(pTexture, (int)mPosX-camX-(PLAYER_WIDTH) / 2, (int)mPosY - 64*(PlayerState==PCROUCH) - camY + height_offset, 128, 128, &clip, 0.0f, NULL, PlayerController[PLAYER_RIGHT] > 0 ? SDL_FLIP_NONE : SDL_FLIP_HORIZONTAL);
+    LTextureRenderEx(pTexture, (Player.mPosX-camera.x-0.6*Player.playerWidth)*TileMapGetTileWidth(), (Player.mPosY - 1.f*(PlayerState==PCROUCH)-camera.y)*TileMapGetTileHeight(), TileMapGetTileWidth()*2, TileMapGetTileHeight()*2, &clip, 0.0f, NULL, PlayerController[PLAYER_RIGHT] > 0 ? SDL_FLIP_NONE : SDL_FLIP_HORIZONTAL);
 }
 
-int PlayerGetX(){ return (int)mPosX; }
+float PlayerGetX(){return Player.mPosX;}
 
-int PlayerGetY() { return (int)mPosY; }
+float PlayerGetY() {return Player.mPosY;}
+
+float PlayerGetW() {return Player.playerWidth;}
+
+float PlayerGetH() {return Player.playerHeight;}

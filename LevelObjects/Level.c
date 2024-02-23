@@ -5,12 +5,14 @@
 #include "Level.h"
 #include "TileMap.h"
 #include "string.h"
+#include "../GameWindow.h"
+#include "physics.h"
 
 struct LTexture gTextureBackground;
 
 // Nobody tell them
 extern SDL_Renderer* gRenderer;
-extern SDL_Rect camera;
+extern SDLP_FloatRect camera;
 
 char currentLevelPath[200];
 
@@ -26,6 +28,7 @@ void LevelLoadLevel(char * path)
 {
     strcpy(currentLevelPath,path);
     TileMapLoadTileMap(path);
+    TileMapUpdateConstantsFromDisplay();
 }
 
 void LevelSaveLevel()
@@ -36,8 +39,8 @@ void LevelSaveLevel()
 void LevelDrawLevel()
 {
     // The textures repeat every 512 pixels, so just snap back there
-    SDL_Rect background_render = {(camera.x/4)%512, (camera.y/4)%512, camera.w/4, camera.h/4};
-    LTextureRender(&gTextureBackground,0,0,camera.w, camera.h, &background_render);
+    SDL_Rect background_render = {((int)(camera.x*(float)TileMapGetTileWidth())/2)%512, ((int)(camera.y*(float)TileMapGetTileWidth())/2)%512, GameWindowGetWindowWidth()/2, GameWindowGetWindowHeight()/2};
+    LTextureRender(&gTextureBackground,0,0,GameWindowGetWindowWidth(), GameWindowGetWindowHeight(), &background_render);
     TileMapRenderTiles();
 }
 

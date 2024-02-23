@@ -12,6 +12,7 @@
 #include "MenuObjects/LMenu.h"
 #include "LevelObjects/Level.h"
 #include "GameWindow.h"
+#include "LevelObjects/physics.h"
 
 
 //Starts up SDL and creates window
@@ -22,7 +23,7 @@ bool loadMedia();
 
 //Renderer for textures
 SDL_Renderer* gRenderer = NULL;
-extern SDL_Rect camera;
+extern SDLP_FloatRect camera;
 // Renderer for tiles onto a texture
 
 enum GameStates gState = GS_MENU;

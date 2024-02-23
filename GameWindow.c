@@ -5,6 +5,7 @@
 #include "GameWindow.h"
 #include "LevelObjects/LCamera.h"
 #include "MenuObjects/LMenu.h"
+#include "LevelObjects/TileMap.h"
 
 extern SDL_Renderer *gRenderer;
 
@@ -56,6 +57,7 @@ void GameWindowHandleEvent(SDL_Event *e)
                 WindowStruct.mHeight = e->window.data2;
                 LMenuInitMenu();
                 LCameraInitCamera();
+                TileMapUpdateConstantsFromDisplay();
                 SDL_RenderPresent(gRenderer);
                 break;
             case SDL_WINDOWEVENT_EXPOSED:
@@ -97,6 +99,7 @@ void GameWindowHandleEvent(SDL_Event *e)
         }
         LMenuInitMenu();
         LCameraInitCamera();
+        TileMapUpdateConstantsFromDisplay();
     }
 }
 

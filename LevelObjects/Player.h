@@ -10,30 +10,34 @@
 #include "../LTexture.h"
 #include "../main.h"
 
-//The dimensions of the dot
-static int PLAYER_HEIGHT = 127;
-#define PLAYER_WIDTH 63
+#define DEFAULT_PLAYER_WIDTH 0.8f
+#define DEFAULT_PLAYER_HEIGHT 1.9f
 
 #define PLAYER_TEXTURE_HEIGHT 64
 #define PLAYER_TEXTURE_WIDTH 64
 
 //Maximum axis velocity of the dot
-static const float PLAYER_ACCELERATION = 0.1f;
-static const float PLAYER_JUMP_ANTIGRAVITY = 0.07f;
+static const float PLAYER_ACCELERATION = 0.003f;
+static const float PLAYER_JUMP_ANTIGRAVITY = 0.001f;
+static const float PLAYER_JUMP_VELOCITY = 0.05f;
 
-static const float CROUCH_FACTOR = 0.5f;
+static const float CROUCH_FACTOR = 0.005f;
 
-static const float PLAYER_VELOCITY = 1.f;
+static const float PLAYER_VELOCITY = .03f;
 
-int PlayerGetX();
+float PlayerGetX();
 
-int PlayerGetY();
+float PlayerGetY();
+
+float PlayerGetW();
+
+float PlayerGetH();
 
 void PlayerPause();
 
 void PlayerUnpause();
 
-void PlayerRespawn();
+void PlayerRespawn(float x, float y);
 
 void EditorSetCurrentTile(int tileVal);
 
